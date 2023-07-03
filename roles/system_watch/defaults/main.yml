@@ -1,0 +1,48 @@
+---
+
+# set it to git repository for logging (needs write permissions)
+# e.g. system_watch_repo: ssh://git@git.yourserver.com/log.git
+system_watch_repo: ''
+system_watch_repo_version: main
+
+system_watch_dir: /srv/.log
+system_watch_host: '{{ ansible_hostname }}'
+
+system_watch_rsync_opts:
+  - "--delete-excluded"
+  - "--exclude=*~"
+  - "--exclude=.git"
+  - "--exclude=*.dpkg-new"
+  - "--exclude=*.dpkg-old"
+  - "--exclude=/mtab"
+  - "--exclude=/ld.so.cache"
+  - "--exclude=/hosts.deny.purge.bak"
+
+# use can overwrite this list which additional options
+system_watch_rsync_opts_more: []
+
+# Additional options for ls, e.g. to ignore files/directories
+system_watch_ls_options: "--ignore='apt' --ignore='letsencrypt'"
+
+# Log status of these git repositories (path to git project)
+# (For drupal_instances and redmine_instances this is done automatically)
+# e.g.
+# - name: project1
+#   path: /srv/project1
+# - name: project2
+#   path: /srv/project2
+system_watch_git_status_repos: []
+
+# if drupal_instances is defined and iterable, Drupal watching is active
+
+# if redmine_instances is defined and is a dictionary, Redmine watching is active
+
+# For replication (advanced)
+
+# git, drupal and redmine watch only run, if
+# mysql_replication_role is undefined or mysql_replication_role=='master'
+
+# see https://github.blog/2022-04-12-git-security-vulnerability-announced/
+system_watch_add_git_safe_directory: false
+
+rails_env: production

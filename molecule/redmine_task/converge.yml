@@ -1,0 +1,11 @@
+---
+- name: Converge
+  hosts: all
+  collections:
+      - alphanodes.tasks
+
+  vars:
+    redmine_task_name: reminder
+
+  roles:
+    - role: alphanodes.tasks.redmine_task

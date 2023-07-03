@@ -1,0 +1,12 @@
+---
+
+- name: Set maintenance_tasks - {{ instance_name }}
+  ansible.builtin.set_fact:
+    receive_mails: "{{ instance.receive_mails | default(redmine_receive_mails) }}"
+
+- name: Include receive tasks - {{ instance_name }}
+  ansible.builtin.include_tasks: task_receive_account.yml
+  loop: "{{ receive_mails | default([]) }}"
+  loop_control:
+    loop_var: account
+  when: account.name is defined and account.name != ''

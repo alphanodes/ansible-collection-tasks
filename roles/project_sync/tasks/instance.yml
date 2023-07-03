@@ -1,0 +1,40 @@
+---
+- name: Set facts
+  ansible.builtin.set_fact:
+    date_stamp: "{{ lookup('pipe', 'date +%Y%m%d%H%M') }}"
+    source_host: "{{ instance.src_host | default('') }}"
+    ssh_source_options: "{{ instance.ssh_source_options | default('') }}"
+    scp_source_options: "{{ instance.scp_source_options | default('') }}"
+
+- name: "Pre command include for {{ instance.name }}"
+  ansible.builtin.include_tasks: instance_pre_commands.yml
+  tags: pre_commands
+  when: >
+    (instance.pre_drush_commands is defined and instance.pre_drush_commands is iterable) or
+    (instance.pre_commands is defined and instance.pre_commands is iterable)
+
+- name: "MySQL include for {{ instance.name }}"
+  ansible.builtin.include_tasks: instance_mysql.yml
+  tags:
+    - mysql
+    - db
+  when: instance.db_type is defined and instance.db_type == 'mysql'
+
+- name: "PostgreSQL include for {{ instance.name }}"
+  ansible.builtin.include_tasks: instance_postgresql.yml
+  tags:
+    - postgresql
+    - db
+  when: instance.db_type is defined and instance.db_type == 'postgresql'
+
+- name: "Files include for {{ instance.name }}"
+  ansible.builtin.include_tasks: instance_files.yml
+  tags: files
+  when: instance.src_dir is defined and instance.src_dir != ''
+
+- name: "Post command include for {{ instance.name }}"
+  ansible.builtin.include_tasks: instance_post_commands.yml
+  tags: post_commands
+  when: >
+    (instance.post_drush_commands is defined and instance.post_drush_commands is iterable) or
+    (instance.post_commands is defined and instance.post_commands is iterable)

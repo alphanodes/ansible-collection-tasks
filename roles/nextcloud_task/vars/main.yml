@@ -1,0 +1,3 @@
+---
+nextcloud_available_tasks:
+  - cron

@@ -1,0 +1,25 @@
+---
+# defaults file for backup
+
+lxc_backup_dir: /srv/backups
+
+lxc_backup_sets: []
+
+# if specified, only this set is running
+lxc_backup_set_name: ''
+
+lxc_backup_mount_parent_dir: /mnt
+lxc_backup_mount_fstype: ext4
+lxc_backup_mount_opts: defaults,noauto
+
+lxc_backup_vg_name: vg0
+lxc_backup_with_stop: false
+
+# if container has stopped, wait this amount of seconds
+lxc_backup_wait_seconds: 10
+
+# create only one backup per day
+# (existing backup of same day will be removed)
+lxc_backup_one_per_day_limit: true
+
+lxc_backup_max_days: 30

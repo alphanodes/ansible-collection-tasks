@@ -1,0 +1,48 @@
+---
+- name: Set sync excludes
+  ansible.builtin.set_fact:
+    sync_excludes: "{{ instance.sync_excludes | default(project_sync_excludes) }}"
+
+- name: Sync files from remote host - {{ instance.name }}
+  ansible.builtin.command: >
+    rsync {{ project_sync_remote_rsync_options }}
+    --exclude={{ sync_excludes | join(' --exclude=') | default('') }}
+    {{ '-e "ssh ' + ssh_source_options + '" ' if ssh_source_options != '' else '' }}{{ instance.src_host }}:{{ instance.src_dir }}
+    {{ instance.target_parent_dir }}/
+  become: "{{ instance.rsync_become | default(false) }}"
+  become_user: '{{ instance.rsync_become_user | default(omit) }}'
+  register: sync_result
+  changed_when: sync_result.stdout_lines | length != 4
+  when: instance.src_host is defined and instance.src_host != ''
+
+- name: Sync files - {{ instance.name }}
+  ansible.builtin.command: >
+    rsync {{ project_sync_local_rsync_options }}
+    --exclude={{ sync_excludes | join(' --exclude=') | default('') }}
+    {{ instance.src_dir }} {{ instance.target_parent_dir }}/
+  become: "{{ instance.rsync_become | default(false) }}"
+  become_user: '{{ instance.rsync_become_user | default(omit) }}'
+  register: sync_result
+  changed_when: sync_result.stdout_lines | length != 4
+  when: instance.src_host is not defined or instance.src_host == ''
+
+- name: Set permissions to directories - {{ instance.name }}
+  ansible.builtin.file:
+    path: '{{ item.name }}'
+    owner: '{{ item.owner }}'
+    group: '{{ item.group }}'
+    recurse: true
+  loop: '{{ instance.target_dirs_permission | default([]) }}'
+
+#  synchronize:
+#    mode: pull
+#    src: '{{ instance.target_dir }}/'
+#    dest: '{{ instance.src_dir }}'
+#    dest_port: '{{ instance.src_port | default(omit) }}'
+#    delete: true
+#    recursive: true
+#    archive: true
+#    rsync_timeout: 10
+#    set_remote_user: false
+#    verify_host: false
+#  delegate_to: "{{ instance.src_host }}"

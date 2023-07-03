@@ -1,0 +1,16 @@
+---
+- name: Converge
+  hosts: all
+  collections:
+      - alphanodes.tasks
+
+  vars:
+    backup_create_hashfiles: true
+    backup_sets:
+      - name: etc
+        src: /etc
+      - name: root
+        src: /root
+
+  roles:
+    - role: alphanodes.tasks.backup

@@ -1,0 +1,10 @@
+---
+
+# possible values: see vars/main.yml
+nextcloud_task_name: 'cron'
+
+nextcloud_dir: /srv/nextcloud
+nextcloud_htdocs: '{{ nextcloud_dir }}/htdocs'
+nextcloud_user: www-data
+
+nextcloud_console_command: ''

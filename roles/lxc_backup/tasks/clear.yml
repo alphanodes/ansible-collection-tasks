@@ -1,0 +1,44 @@
+---
+- name: Find temporary backup files.
+  ansible.builtin.find:
+    paths: "{{ lxc_backup_dir }}"
+    file_type: file
+    patterns: "lxc-*.tar"
+  register: backup_tmp
+
+- name: Remove temporary backup files.
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ backup_tmp.files | default([]) }}"
+  when: backup_tmp.matched > 0
+
+- name: Find old files.
+  ansible.builtin.find:
+    paths: "{{ lxc_backup_dir }}"
+    file_type: file
+    patterns:
+      - 'lxc-*.tar.gz*'
+    age: "{{ lxc_backup_max_days }}d"
+    age_stamp: mtime
+  register: backup_files
+
+- name: Remove old files.
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ backup_files.files | default([]) }}"
+  when: backup_files.matched > 0
+
+- name: Search for existing backup files.
+  ansible.builtin.shell: ls -1 {{ lxc_backup_dir }}/*-{{ day_stamp }}*
+  register: day_files
+  failed_when: day_files.rc > 2
+  changed_when: false
+  when: lxc_backup_one_per_day_limit
+
+- name: Remove existing backups of the current day.
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop: "{{ day_files.stdout_lines | default([]) }}"

@@ -1,0 +1,50 @@
+---
+- name: Set facts - {{ account.name }}
+  ansible.builtin.set_fact:
+    mails_no_log: "{{ account.no_log | default(redmine_receive_mails_no_log) }}"
+    mails_host: "{{ account.host | default(redmine_receive_mails_host) }}"
+    mails_user: "{{ account.user | default(redmine_receive_mails_user) }}"
+    mails_password: "{{ account.password | default(redmine_receive_mails_password) }}"
+    mails_protocol: "{{ account.protocol | default(redmine_receive_mails_protocol) }}"
+    mails_port: "{{ account.port | default(redmine_receive_mails_port) }}"
+    mails_ssl: "{{ account.ssl | default(redmine_receive_mails_ssl) }}"
+    mails_allow_override: "{{ account.allow_override | default(redmine_receive_mails_allow_override) }}"
+    mails_options: "{{ account.options | default(redmine_receive_mails_options) }}"
+
+- name: Check missing host - {{ account.name }}
+  ansible.builtin.fail:
+    msg: 'host is missing for {{ account.name }}'
+  when: mails_host == ''
+
+- name: Check missing user - {{ account.name }}
+  ansible.builtin.fail:
+    msg: 'user is missing for {{ account.name }}'
+  when: mails_user == ''
+
+- name: Check missing password - {{ account.name }}
+  ansible.builtin.fail:
+    msg: 'password is missing for {{ account.name }}'
+  when: mails_password == ''
+
+- name: Check mssing protocol - {{ account.name }}
+  ansible.builtin.fail:
+    msg: 'unknown protocol for {{ account.name }}'
+  when: mails_protocol == '' or (mails_protocol != 'imap' and mails_protocol != 'pop3')
+
+- name: Receive mails for account {{ account.name }}
+  ansible.builtin.command: bash -lc "bundle exec rake redmine:email:receive_{{ mails_protocol }} host={{ mails_host }} username='{{ mails_user }}' password='{{ mails_password }}' port={{ mails_port }} {{ 'ssl=true' if mails_ssl else '' }} allow_override='{{ mails_allow_override }}'{{ '' if mails_options == '' else ' ' + mails_options }}"
+  args:
+    chdir: '{{ redmine_app_dir }}'
+  register: receive
+  changed_when: receive.stdout_lines | length
+  no_log: '{{ mails_no_log }}'
+  become: true
+  become_user: '{{ redmine_user }}'
+  environment:
+    RAILS_ENV: '{{ redmine_rails_env }}'
+    LOG_TO_STDOUT: '1'
+
+- name: Output of receive for - {{ account.name }}
+  ansible.builtin.debug:
+    var: receive.stdout_lines
+  when: receive.stdout_lines | length

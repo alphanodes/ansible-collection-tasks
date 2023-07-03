@@ -1,0 +1,8 @@
+---
+
+- name: Restart Server
+  ansible.builtin.reboot:
+    pre_reboot_delay: '{{ system_task_reboot_delay }}'
+    reboot_timeout: '{{ system_task_reboot_timeout }}'
+    msg: '{{ system_task_reboot_msg | default(omit) }}'
+  ignore_errors: true

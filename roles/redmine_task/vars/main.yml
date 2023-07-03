@@ -1,0 +1,9 @@
+---
+redmine_available_tasks:
+  - automation
+  - helpdesk
+  - maintenance
+  - rebuild-index
+  - receive
+  - reminder
+  - update-index

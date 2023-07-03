@@ -1,0 +1,33 @@
+---
+
+- name: Log drush metadata - {{ instance.name }}
+  ansible.builtin.shell: "{{ instance.drush_path | default(drush_path) }} @{{ instance.name }} status > {{ system_watch_log_dir }}/drupal_{{ instance.name }}.txt"
+  changed_when: false
+
+- name: Log drupal module list - {{ instance.name }}
+  ansible.builtin.shell: "{{ instance.drush_path | default(drush_path) }} @{{ instance.name }} pm-list >> {{ system_watch_log_dir }}/drupal_{{ instance.name }}.txt"
+  changed_when: false
+
+- name: Add drupal info for branches - {{ instance.name }}
+  ansible.builtin.shell: 'echo "Branches:" > {{ system_watch_log_dir }}/git_status_{{ instance.name }}.txt'
+  changed_when: false
+
+- name: Log current drupal git branches - {{ instance.name }}
+  ansible.builtin.shell: "git --work-tree={{ instance.dir }} branch -a >> {{ system_watch_log_dir }}/git_status_{{ instance.name }}.txt"
+  changed_when: false
+  args:
+    chdir: '{{ instance.dir }}'
+
+- name: Add empty line - {{ instance.name }}
+  ansible.builtin.shell: 'echo "" >> {{ system_watch_log_dir }}/git_status_{{ instance.name }}.txt'
+  changed_when: false
+
+- name: Add drupal info for change status - {{ instance.name }}
+  ansible.builtin.shell: 'echo "Changes:" >> {{ system_watch_log_dir }}/git_status_{{ instance.name }}.txt'
+  changed_when: false
+
+- name: Log drupal git status - {{ instance.name }}
+  ansible.builtin.shell: "git --work-tree={{ instance.dir }} status -s >> {{ system_watch_log_dir }}/git_status_{{ instance.name }}.txt"
+  changed_when: false
+  args:
+    chdir: '{{ instance.dir }}'

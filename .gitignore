@@ -1,0 +1,9 @@
+.kitchen
+hosts
+Gemfile.lock
+.venv
+.vscode
+.DS_Store
+/*.retry
+tmp/
+*~

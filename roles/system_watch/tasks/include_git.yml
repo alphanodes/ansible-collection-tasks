@@ -1,0 +1,38 @@
+---
+
+# git_config does not support multiple values
+# see https://docs.ansible.com/ansible/2.9/modules/git_config_module.html
+# - name: Add git safe directory - {{ instance_name }}
+#   git_config:
+#     name: safe.directory
+#     value: '{{ instance.path }}'
+#     scope: global
+#   when: system_watch_add_git_safe_directory
+
+- name: Add git safe directory - {{ instance_name }}
+  ansible.builtin.command: git config --global --replace-all safe.directory {{ instance.path }}
+  when: system_watch_add_git_safe_directory
+
+- name: Add info for branches
+  ansible.builtin.shell: 'echo "Branches:" > {{ system_watch_log_dir }}/git_status_{{ instance.name }}.txt'
+  changed_when: false
+
+- name: Log current git branches
+  ansible.builtin.shell: "git --work-tree={{ instance.path }} branch -a >> {{ system_watch_log_dir }}/git_status_{{ instance.name }}.txt"
+  changed_when: false
+  args:
+    chdir: '{{ instance.path }}'
+
+- name: Add empty line - {{ instance.name }}
+  ansible.builtin.shell: 'echo "" >> {{ system_watch_log_dir }}/git_status_{{ instance.name }}.txt'
+  changed_when: false
+
+- name: Add info for change status
+  ansible.builtin.shell: 'echo "Changes:" >> {{ system_watch_log_dir }}/git_status_{{ instance.name }}.txt'
+  changed_when: false
+
+- name: Log git status
+  ansible.builtin.shell: "git --work-tree={{ instance.path }} status -s >> {{ system_watch_log_dir }}/git_status_{{ instance.name }}.txt"
+  changed_when: false
+  args:
+    chdir: '{{ instance.path }}'

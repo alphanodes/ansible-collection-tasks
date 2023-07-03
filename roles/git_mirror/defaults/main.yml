@@ -1,0 +1,15 @@
+---
+
+# Used for redmine git integration and remote git repositories
+# (git bare repositories as mirror)
+git_mirrors_root: /srv/mirrors
+
+git_mirrors: []
+# - name: yourrepo (used as subdirectory for checkout)
+#   repo: git.github.com:yourname/target-repo-name
+#   version: dev
+
+git_mirrors_packages:
+  - git
+  - subversion
+  - svn2git

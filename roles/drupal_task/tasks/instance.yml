@@ -1,0 +1,15 @@
+---
+- name: Include rollout for {{ instance.name }}
+  ansible.builtin.include_tasks: task_rollout.yml
+  tags: rollout
+  when: drupal_task_name == 'rollout'
+
+- name: Include cron for {{ instance.name }}
+  ansible.builtin.include_tasks: task_cron.yml
+  tags: cron
+  when: drupal_task_name == 'cron'
+
+- name: Include scheduler for {{ instance.name }}
+  ansible.builtin.include_tasks: task_scheduler.yml
+  tags: scheduler
+  when: drupal_task_name == 'scheduler'

@@ -1,0 +1,24 @@
+---
+
+- name: Run post commands - {{ instance.name }}
+  ansible.builtin.command: '{{ item.command }}'
+  become: "{{ item.become | default(false) }}"
+  become_user: '{{ item.become_user | default(omit) }}'
+  args:
+    chdir: '{{ item.chdir | default(omit) }}'
+  loop: '{{ instance.post_commands | default([]) }}'
+
+- name: Run post uri
+  when: instance.post_uri is defined
+  block:
+    - name: Run post uri - {{ instance.name }}
+      ansible.builtin.uri:
+        url: "{{ instance.post_uri }}"
+        return_content: true
+        body_format: json
+        validate_certs: false
+      register: post_response
+
+    - name: Output of post uri
+      ansible.builtin.debug:
+        var: post_response

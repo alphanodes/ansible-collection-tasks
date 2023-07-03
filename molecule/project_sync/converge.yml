@@ -1,0 +1,27 @@
+---
+- name: Converge
+  hosts: all
+  collections:
+      - alphanodes.tasks
+
+  pre_tasks:
+    - name: Update apt cache.
+      ansible.builtin.apt:
+        update_cache: yes
+        cache_valid_time: 600
+      changed_when: false
+
+    - name: Install rsync.
+      ansible.builtin.apt:
+        name: rsync
+        state: present
+
+  vars:
+    project_sync_instance_name: etc-mirror-test
+    project_sync_instances:
+      - name: etc-mirror-test
+        src_dir: /etc
+        target_parent_dir: /tmp
+
+  roles:
+    - role: alphanodes.tasks.project_sync

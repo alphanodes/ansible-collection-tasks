@@ -1,0 +1,66 @@
+---
+# project_sync_instances:
+#   - name: prod-staging
+#     src_host: remote-prod.example.com
+#     src_dir: /srv/store/files
+#     target_parent_dir: /srv/store
+#     db_type: postgresql
+#     db_source_name: store
+#     db_target_name: store
+#     db_target_owner: store
+#     pre_commands: []
+#     pre_drush_commands: []
+#     post_commands: []
+#     post_sql_commands: []
+#     post_drush_commands: []
+
+project_sync_instances: []
+
+# only used on remote hosts
+project_sync_mysqldump_options: '--extended-insert=false --opt --single-transaction'
+
+# only used on local hosts
+project_sync_mysql_single_transaction: true
+project_sync_mysql_quick: true
+
+# -Fc (custom format is not supported by restore!)
+project_sync_postgresql_dump_options: '--no-owner'
+project_sync_postgresql_restore_options: '-n public'
+
+project_sync_remote_rsync_options: '-avz --delete'
+project_sync_local_rsync_options: '-av --delete'
+
+project_sync_excludes:
+  - '*.journal'
+  - '.nfs*'
+
+project_sync_recreate_db: true
+
+# use this directory to create temporarily database dump
+project_sync_tmp_dir: /tmp
+
+# only run this instance
+project_sync_instance_name: ''
+
+# if you want to use post_drush_commands, you have to set the path to drush
+drush_path: /root/.composer/vendor/bin/drush
+
+# For replication (advanced)
+
+# set it to false, replication settings is required
+# set project_sync_master with run_on_sync_master or
+# and project_sync_client with run_on_sync_client
+project_sync_skip_replication: true
+
+# Can be used in replication environments. If this is set to yes, only instances with
+# run_on_sync_master: true will run
+project_sync_master: false
+
+# Can be used in replication environments. If this is set to yes, only instances with
+# run_on_sync_client: true will run
+project_sync_client: false
+
+# if no project_sync_instance_name is not defined, all instances with run_on_sync_master are running
+project_sync_run_all_master: true
+# if no project_sync_instance_name is not defined, all instances with run_on_sync_client are running
+project_sync_run_all_client: true

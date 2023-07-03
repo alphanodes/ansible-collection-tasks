@@ -1,0 +1,17 @@
+---
+- name: Include setup tasks
+  ansible.builtin.include_tasks: setup.yml
+  tags: project-sync
+
+- name: Include instance tasks
+  ansible.builtin.include_tasks: instance.yml
+  tags: project-sync
+  loop: "{{ project_sync_instances | default([]) }}"
+  loop_control:
+    loop_var: instance
+  when: >
+    (project_sync_instance_name != '' and project_sync_instance_name == instance.name)
+    or (project_sync_instance_name == ''
+        and (project_sync_skip_replication or
+          ((project_sync_run_all_master and project_sync_master and instance.run_on_sync_master is defined and instance.run_on_sync_master)
+          or (project_sync_run_all_client and project_sync_client and instance.run_on_sync_client is defined and instance.run_on_sync_client))))

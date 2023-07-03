@@ -1,0 +1,4 @@
+---
+matomo_task_available_tasks:
+  - import-dump
+  - geoip-update

@@ -1,0 +1,34 @@
+---
+
+- name: Include setup tasks
+  ansible.builtin.include_tasks: setup.yml
+  tags: git_mirror
+
+- name: Include git mirror tasks
+  ansible.builtin.include_tasks: git_mirror.yml
+  tags: git_mirror
+  loop: "{{ git_mirrors }}"
+  loop_control:
+    loop_var: repo_spec
+  when: >
+    (repo_spec.state is undefined or repo_spec.state == 'active')
+    and (repo_spec.vcs is undefined or repo_spec.vcs == 'git')
+
+- name: Include svn mirror tasks
+  ansible.builtin.include_tasks: svn_mirror.yml
+  tags: git_mirror
+  loop: "{{ git_mirrors }}"
+  loop_control:
+    loop_var: repo_spec
+  when: >
+    (repo_spec.state is undefined or repo_spec.state == 'active')
+    and (repo_spec.vcs is defined and repo_spec.vcs == 'svn')
+
+- name: Remove mirrors
+  tags: git_mirror
+  ansible.builtin.file:
+    path: '{{ git_mirrors_root }}/{{ item.name }}'
+    state: absent
+  loop: "{{ git_mirrors }}"
+  when: >
+    item.state is defined and item.state == 'absent'

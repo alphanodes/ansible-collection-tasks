@@ -1,0 +1,16 @@
+---
+- name: Get MySQL databases
+  community.mysql.mysql_info:
+    filter:
+      - databases
+    exclude_fields:
+      - db_size
+    config_file: '{{ backup_mysql_defaults_extra_file | default(omit, true) }}'
+  register: db_list
+
+- name: Include MySQL db tasks
+  ansible.builtin.include_tasks: mysql_db.yml
+  loop: "{{ db_list.databases.keys() | list | default([]) }}"
+  loop_control:
+    loop_var: db
+  when: db not in backup_mysql_db_excludes

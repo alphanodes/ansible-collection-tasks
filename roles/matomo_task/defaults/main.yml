@@ -1,0 +1,23 @@
+---
+matomo_dir: /srv/matomo
+matomo_user: www-data
+matomo_db_name: matomo
+
+# set url to use
+matomo_domain: ''
+
+# see https://matomo.org/docs/setup-auto-archiving/
+# - core:archive
+# see https://plugins.matomo.org/QueuedTracking#faq
+# - queuedtracking:process
+# see https://matomo.org/docs/update/#database-upgrade-for-high-traffic-matomo-servers
+# - core:update
+matomo_console_name: ''
+
+# sync config/config.ini.php from primary server
+# - geoip_update
+matomo_task_name: ''
+
+matomo_task_geo_target_file: DBIP-City.mmdb
+matomo_task_geo_source_file: dbip-city-lite-{{ ansible_date_time.year }}-{{ ansible_date_time.month }}.mmdb
+matomo_task_geo_url: https://download.db-ip.com/free/{{ matomo_task_geo_source_file }}.gz

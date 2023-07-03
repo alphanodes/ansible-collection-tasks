@@ -1,0 +1,10 @@
+---
+
+# if not specified, all instances specified in jekyll_instances are used
+jekyll_rollout_instance: ''
+# default settings of rollout
+# (you can overwrite it in drupal_instances list)
+jekyll_rollout_without_clean: true
+jekyll_base_dir: /srv/jekyll
+jekyll_site_prod: _site_prod
+jekyll_env: production

@@ -1,0 +1,23 @@
+---
+
+- name: Check nextcloud_task_name
+  ansible.builtin.fail:
+    msg: 'nextcloud_task_name is required'
+  when: nextcloud_task_name == ''
+  tags:
+    - nextcloud
+
+- name: Check if nextcloud_task_name is valid
+  ansible.builtin.fail:
+    msg: 'nextcloud_task_name is not support. See vars/main.yml for supported tasks'
+  when: nextcloud_task_name not in nextcloud_available_tasks
+  tags:
+    - nextcloud
+
+- name: Run task
+  ansible.builtin.include_tasks: 'task_{{ nextcloud_task_name }}.yml'
+  when: >
+    (mysql_replication_role is undefined or mysql_replication_role == 'master')
+    and sync_master is undefined
+  tags:
+    - nextcloud

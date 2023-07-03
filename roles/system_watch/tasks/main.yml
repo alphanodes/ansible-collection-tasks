@@ -1,0 +1,5 @@
+---
+
+- name: Include base tasks
+  ansible.builtin.include_tasks: base.yml
+  tags: system-watch

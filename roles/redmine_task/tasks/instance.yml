@@ -1,0 +1,32 @@
+---
+
+- name: Set instance variables
+  ansible.builtin.set_fact:
+    instance: "{{ r_instance.value }}"
+    instance_name: "{{ r_instance.key }}"
+
+- name: Set redmine_user - {{ instance_name }}
+  ansible.builtin.set_fact:
+    redmine_user: "{{ instance.user | default(instance_name) }}"
+
+- name: Set redmine_home - {{ instance_name }}
+  ansible.builtin.set_fact:
+    redmine_home: "{{ redmine_base_dir }}/{{ instance_name }}"
+
+- name: Set redmine_app_dir - {{ instance_name }}
+  ansible.builtin.set_fact:
+    redmine_app_dir: "{{ redmine_home }}/{{ redmine_app_dir_name }}"
+
+- name: Set redmine_rails_env - {{ instance_name }}
+  ansible.builtin.set_fact:
+    redmine_rails_env: '{{ instance.rails_env | default(rails_env) }}'
+
+- name: Set with_instance_task for instance - {{ instance_name }}
+  ansible.builtin.set_fact:
+    with_instance_task: 'with_{{ redmine_task_name }}_task'
+
+- name: Run task - {{ instance_name }}
+  ansible.builtin.include_tasks: 'task_{{ redmine_task_name }}.yml'
+  when: >
+    redmine_task_multi_instance_default
+    or (instance[with_instance_task] is defined and instance[with_instance_task]|bool)

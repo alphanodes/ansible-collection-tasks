@@ -1,0 +1,12 @@
+---
+
+- name: Be sure required packages are installed
+  ansible.builtin.apt:
+    name: '{{ git_mirrors_packages }}'
+    state: present
+
+- name: Create root directory for mirrors
+  ansible.builtin.file:
+    path: '{{ git_mirrors_root }}'
+    state: directory
+    recurse: true

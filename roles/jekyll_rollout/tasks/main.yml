@@ -1,0 +1,11 @@
+---
+
+- name: Include instance tasks
+  ansible.builtin.include_tasks: instance.yml
+  loop: "{{ jekyll_instances }}"
+  loop_control:
+    loop_var: instance
+  when: >
+    (jekyll_rollout_instance == '' or instance.name == jekyll_rollout_instance) and
+    (instance.state is undefined or instance.state == 'active')
+  tags: jekyll

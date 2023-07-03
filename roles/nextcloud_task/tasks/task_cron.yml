@@ -1,0 +1,12 @@
+---
+
+- name: Run nextcloud cron
+  ansible.builtin.command: 'php -f {{ nextcloud_htdocs }}/cron.php'
+  register: task_result
+  become: true
+  become_user: '{{ nextcloud_user }}'
+
+- name: Output of task
+  ansible.builtin.debug:
+    var: task_result.stdout_lines
+  when: task_result.stdout_lines is defined and task_result.stdout_lines | length

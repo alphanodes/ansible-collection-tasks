@@ -1,0 +1,24 @@
+---
+# required value!
+# possible values: rollout, cron, scheduler (light-weight cron)
+drupal_task_name: ''
+
+# if not specified, all instances specified in drupal_instances are used
+# overwrite it!
+drupal_task_instance: ''
+
+# user for running drush
+# if not set become_user is not used
+# drush_user: www-data
+
+# default settings of rollout task
+# (you can overwrite it in drupal_insances list)
+drupal_rollout_with_updatedb: true
+drupal_rollout_with_entity_updates: false
+drupal_rollout_with_cron: true
+drupal_rollout_with_cache_clear: true
+drupal_rollout_with_cim: false
+
+drupal_vhost_dir: '/htdocs'
+drush_path: /root/.composer/vendor/bin/drush
+drupal_composer_params: update -n

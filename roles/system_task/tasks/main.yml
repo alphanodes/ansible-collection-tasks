@@ -1,0 +1,10 @@
+---
+
+- name: Check if system_task_name is defined
+  ansible.builtin.fail:
+    msg: 'system_task_name variable has to be set with --extra-vars "system_task_name=service_restart"'
+  when: system_task_name == ''
+
+- name: Include task
+  ansible.builtin.include_tasks: 'task_{{ system_task_name }}.yml'
+  tags: system_task

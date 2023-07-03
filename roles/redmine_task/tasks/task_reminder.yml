@@ -1,0 +1,16 @@
+---
+- name: Send reminder mail - {{ instance_name }}
+  ansible.builtin.command: bash -lc "bundle exec rake redmine:send_reminders days={{ redmine_task_reminder_day }}"
+  args:
+    chdir: '{{ redmine_app_dir }}'
+  register: reminder
+  changed_when: reminder.stdout_lines | length
+  become: true
+  become_user: '{{ redmine_user }}'
+  environment:
+    RAILS_ENV: '{{ redmine_rails_env }}'
+
+- name: Output of reminder - {{ instance_name }}
+  ansible.builtin.debug:
+    var: reminder.stdout_lines
+  when: reminder.stdout_lines | length

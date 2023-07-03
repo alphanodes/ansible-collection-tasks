@@ -1,0 +1,15 @@
+---
+- name: Run maintenance task for {{ instance_name }}
+  ansible.builtin.command: bash -lc "bundle exec rake {{ task }}"
+  args:
+    chdir: '{{ redmine_app_dir }}'
+  register: task_rc
+  become: true
+  become_user: '{{ redmine_user }}'
+  environment:
+    RAILS_ENV: '{{ redmine_rails_env }}'
+
+- name: Output of maintenance task {{ task }}
+  ansible.builtin.debug:
+    var: task_rc.stdout_lines
+  when: task_rc.stdout_lines | length

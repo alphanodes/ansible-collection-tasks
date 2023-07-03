@@ -1,0 +1,29 @@
+---
+dependencies: []
+
+galaxy_info:
+  role_name: backup
+  description: Run daily backups for files, MySQL databases and PostgreSQL databases
+  author: alexandermeindl
+  company: AlphaNodes GmbH
+  license: Apache License 2.0
+  min_ansible_version: '2.14'
+  platforms:
+    - name: Ubuntu
+      versions:
+        - focal
+        - jammy
+    - name: Debian
+      versions:
+        - buster
+        - bullseye
+        - bookworm
+  galaxy_tags:
+    - backup
+    - postgresql
+    - mysql
+    - mongodb
+    - borgbackup
+    - files
+    - rotation
+    - daily

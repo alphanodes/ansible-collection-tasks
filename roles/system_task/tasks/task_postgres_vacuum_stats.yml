@@ -1,0 +1,26 @@
+---
+
+# @see https://www.postgresql.org/docs/12/monitoring-stats.html
+
+- name: Generate postgres stats for {{ database }}
+  block:
+    - name: Run stats query
+      community.postgresql.postgresql_query:
+        query: >
+          SELECT relname, n_dead_tup, n_tup_ins, n_tup_upd, n_tup_del,
+          last_vacuum, vacuum_count,
+          last_autovacuum, autovacuum_count,
+          last_analyze, analyze_count,
+          last_autoanalyze, autoanalyze_count
+          FROM pg_stat_all_tables
+          WHERE schemaname = 'public'
+          ORDER BY relname;
+        db: '{{ database }}'
+        autocommit: true
+      become: "{{ true if system_task_postgres_user != '' else false }}"
+      become_user: '{{ system_task_postgres_user | default(omit) }}'
+      register: query_result
+
+    - name: Output of stats query for {{ database }}
+      ansible.builtin.debug:
+        var: query_result

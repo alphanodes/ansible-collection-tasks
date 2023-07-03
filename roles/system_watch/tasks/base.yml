@@ -1,0 +1,144 @@
+---
+
+- name: Set system_watch_log_dir for {{ system_watch_host }}
+  ansible.builtin.set_fact:
+    system_watch_log_dir: "{{ system_watch_dir }}/{{ system_watch_host }}"
+
+- name: Check system_watch_repo
+  ansible.builtin.fail:
+    msg: 'system_watch_repo has to be set. You can also use --extra-vars "system_watch_repo=your-git-repo"'
+  when: system_watch_repo == ''
+
+- name: Git pull system-watch for latest changes (pull 1)
+  ansible.builtin.git:
+    repo: '{{ system_watch_repo }}'
+    dest: '{{ system_watch_dir }}'
+    version: '{{ system_watch_repo_version }}'
+    force: true
+    accept_hostkey: true
+  changed_when: false
+
+- name: Restrict read permissions of log directory
+  ansible.builtin.file:
+    path: '{{ system_watch_dir }}'
+    mode: 0700
+
+- name: Make sure system-watch dir exists
+  ansible.builtin.file:
+    path: '{{ system_watch_log_dir }}'
+    mode: 0755
+    state: directory
+
+- name: Sync etc directory for tracking
+  ansible.posix.synchronize:
+    mode: pull
+    src: /etc/
+    dest: '{{ system_watch_log_dir }}/etc'
+    # NOTE: workaroud for string problem
+    # @SEE https://github.com/ansible-collections/ansible.posix/issues/376#issuecomment-1222046195
+    dest_port: "{{ lookup('ansible.builtin.vars', 'ansible_port', default=22) }}"
+    delete: true
+    rsync_opts: '{{ system_watch_rsync_opts + system_watch_rsync_opts_more }}'
+  delegate_to: "{{ inventory_hostname }}"
+  register: sync_result
+
+- name: Log data
+  environment:
+    GIT_WORK_TREE: '{{ system_watch_dir }}'
+    LANG: 'en_US.UTF-8'
+    LC_ALL: 'en_US.UTF-8'
+  block:
+    # shell allows redirects to file
+    - name: Build etc metadata for tracking
+      ansible.builtin.shell: >
+        set -o pipefail &&
+        ls -Rl {{ system_watch_ls_options |
+        default('') }} --full-time {{ system_watch_log_dir }}/etc >
+        {{ system_watch_log_dir }}/etc_metadata.txt
+      when: sync_result.changed
+      tags:
+        - skip_ansible_lint
+
+    # shell allows redirects to file
+    - name: Create system package list
+      ansible.builtin.shell: >
+        set -o pipefail &&
+        dpkg-query -W -f '${Status}\t${Package} ${Version}\n' |
+        egrep '(ok installed|ok config-files)' |
+        cut -f2,3 > {{ system_watch_log_dir }}/packages.txt
+      register: system_packages
+      changed_when: false
+
+    - name: Check for system package changes
+      ansible.builtin.command: git -C {{ system_watch_dir }} status
+      register: git_system_packages
+      changed_when: "'packages.txt' in git_system_packages.stdout"
+
+    - name: Include git tasks
+      ansible.builtin.include_tasks: include_git.yml
+      loop: '{{ system_watch_git_status_repos | default([]) }}'
+      loop_control:
+        loop_var: instance
+      when: mysql_replication_role is undefined or mysql_replication_role=='master'
+
+    - name: Include drupal tasks
+      ansible.builtin.include_tasks: include_drupal.yml
+      loop: '{{ drupal_instances | default([]) }}'
+      loop_control:
+        loop_var: instance
+      when:
+        - (instance.state is undefined or instance.state == 'active') and (instance.run_drush is undefined or instance.run_drush)
+        - mysql_replication_role is undefined or mysql_replication_role == 'master'
+
+    - name: Include redmine tasks
+      ansible.builtin.include_tasks: include_redmine.yml
+      loop: '{{ redmine_instances | default({}) | dict2items }}'
+      loop_control:
+        loop_var: r_instance
+      when:
+        - r_instance.value.state is undefined or r_instance.value.state == 'active'
+        - mysql_replication_role is undefined or mysql_replication_role == 'master'
+
+    - name: Check for changes
+      ansible.builtin.command: git -C {{ system_watch_dir }} status
+      register: git_add_pre
+      changed_when: "'Untracked files' in git_add_pre.stdout or 'Changes not staged' in git_add_pre.stdout"
+      tags:
+        - skip_ansible_lint
+
+    - name: Add new files to system-watch repo for push
+      ansible.builtin.command: git -C {{ system_watch_dir }} add -A {{ system_watch_log_dir }}
+      register: git_add
+      when: git_add_pre.changed
+      changed_when: git_add.rc == 0
+      tags:
+        - skip_ansible_lint
+
+    - name: Check for commits
+      ansible.builtin.command: git -C {{ system_watch_dir }} status
+      register: git_commit_pre
+      changed_when: "'Changes to be committed' in git_commit_pre.stdout"
+      tags:
+        - skip_ansible_lint
+
+    - name: Commit files to system-watch repo for push
+      ansible.builtin.command: git -C {{ system_watch_dir }} commit -m "Changes found on {{ system_watch_host }}"
+      register: git_commit
+      when: git_commit_pre.changed
+      tags:
+        - skip_ansible_lint
+
+    # this should be before push (pull2 without force)
+    # NOTE: other instances could change it in the meantime, which breaks push
+    # NOTE: ansible git reset files, this could not be used here
+    - name: Pull files to system-watch repo
+      ansible.builtin.command: git -C {{ system_watch_dir }} --work-tree={{ system_watch_dir }} pull
+      when: git_commit_pre.changed
+      tags:
+        - skip_ansible_lint
+
+    - name: Push files to system-watch repo
+      ansible.builtin.command: git -C {{ system_watch_dir }} --work-tree={{ system_watch_dir }} push
+      when: git_commit_pre.changed
+      tags:
+        - skip_ansible_lint

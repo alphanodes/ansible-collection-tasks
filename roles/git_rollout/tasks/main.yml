@@ -1,0 +1,16 @@
+---
+
+- name: Ensure we have ForwardAgent
+  ansible.builtin.command: ssh-add -l
+  changed_when: false
+  when: git_rollout_with_ssh_agent_test
+  tags:
+    - git
+
+- name: Include instance tasks
+  ansible.builtin.include_tasks: instance.yml
+  loop: "{{ git_rollout_instances }}"
+  loop_control:
+    loop_var: instance
+  tags:
+    - git

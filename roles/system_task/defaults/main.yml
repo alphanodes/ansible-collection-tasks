@@ -1,0 +1,29 @@
+---
+
+system_task_name: ''
+
+system_task_reboot_delay: 10
+
+system_task_reboot_timeout: 180
+
+# system_task_reboot_msg:
+
+# name of service, which should be restarted
+system_task_service_name: ''
+
+# use reload instead of restart for service restart
+system_task_service_reload: false
+
+system_task_postgres_database_stats: []
+system_task_postgres_user: postgres
+system_task_postgres_quiet: false
+system_task_postgres_vacuum_options: --all --analyze {{ ' --quiet' if system_task_postgres_quiet else '' }}
+
+system_task_pgbadger_query_log: /var/log/postgresql/postgresql-{{ postgresql_version | default('15') }}-main.log
+system_task_pgbadger_query_outdir: '{{ postgresql_pgbadger_output_dir }}'
+system_task_pgbadger_query_options: -v -I -o index.html
+
+system_task_goaccess_index_file: index.html
+system_task_goaccess_output_dir: /var/www/goaccess
+system_task_goaccess_nginx_log: /var/log/nginx/access.log /var/log/nginx/access.log.1
+system_task_goaccess_options: -a

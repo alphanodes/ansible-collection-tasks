@@ -1,0 +1,64 @@
+---
+- name: Set tmp file for dump
+  ansible.builtin.set_fact:
+    tmp_mysql_dump_file: "{{ project_sync_tmp_dir }}/_mysql_{{ date_stamp }}.sql"
+
+- name: Check if hostname is defined
+  ansible.builtin.fail:
+    msg: 'if no host name is defined, db_source_name and db_target_name has to be different.'
+  when: source_host == '' and instance.db_source_name == instance.db_target_name
+
+- name: Create MySQL database local dump - {{ instance.name }}
+  community.mysql.mysql_db:
+    name: '{{ instance.db_source_name }}'
+    state: dump
+    quick: '{{ project_sync_mysql_quick }}'
+    single_transaction: '{{ project_sync_mysql_single_transaction }}'
+    target: '{{ tmp_mysql_dump_file }}'
+  when: source_host == ''
+
+- name: Create MySQL database dump on remote host - {{ instance.name }}
+  ansible.builtin.command: ssh {{ ssh_source_options + ' ' if ssh_source_options != '' else '' }}{{ source_host }} "mysqldump {{ project_sync_mysqldump_options }} {{ instance.db_source_name }} > {{ tmp_mysql_dump_file }}"
+  when: source_host != ''
+
+- name: Transfer database dump to host - {{ instance.name }}
+  ansible.builtin.command: scp {{ scp_source_options + ' ' if scp_source_options != '' else '' }}{{ source_host }}:{{ tmp_mysql_dump_file }} {{ tmp_mysql_dump_file }}
+  when: source_host != ''
+
+- name: Cleanup remote tmp file - {{ instance.name }}
+  ansible.builtin.command: ssh {{ ssh_source_options + ' ' if ssh_source_options != '' else '' }}{{ source_host }} rm {{ tmp_mysql_dump_file }}
+  when: source_host != ''
+
+- name: Drop database - {{ instance.name }}
+  community.mysql.mysql_db:
+    name: '{{ instance.db_target_name }}'
+    state: absent
+  when: project_sync_recreate_db
+
+- name: Create database - {{ instance.name }}
+  community.mysql.mysql_db:
+    name: '{{ instance.db_target_name }}'
+    state: present
+  when: project_sync_recreate_db
+
+- name: Run pre sql commands for MySQL - {{ instance.name }}
+  community.mysql.mysql_query:
+    login_db: '{{ instance.db_target_name }}'
+    query: '{{ item }}'
+
+- name: Import database dump - {{ instance.name }}
+  community.mysql.mysql_db:
+    name: '{{ instance.db_target_name }}'
+    state: import
+    target: '{{ tmp_mysql_dump_file }}'
+
+- name: Cleanup local tmp file - {{ instance.name }}
+  ansible.builtin.file:
+    path: '{{ tmp_mysql_dump_file }}'
+    state: absent
+
+- name: Run post sql commands for MySQL - {{ instance.name }}
+  community.mysql.mysql_query:
+    login_db: '{{ instance.db_target_name }}'
+    query: '{{ item }}'
+  loop: '{{ instance.post_sql_commands | default([]) }}'

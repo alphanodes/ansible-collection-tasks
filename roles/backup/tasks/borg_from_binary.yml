@@ -1,0 +1,18 @@
+---
+- name: Borg from binary tasks
+  when: backup_borg_install_from_binary
+  block:
+    - name: Install borg binary
+      ansible.builtin.get_url:
+        url: '{{ backup_borg_binary_uri }}'
+        dest: '{{ backup_borg_binary }}'
+        mode: 0755
+        owner: root
+        group: root
+      when: not borg_binary_src_info.stat.exists
+
+- name: Remove binary, because system package is used
+  ansible.builtin.file:
+    path: '{{ backup_borg_binary }}'
+    state: absent
+  when: not backup_borg_install_from_binary

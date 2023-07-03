@@ -1,0 +1,55 @@
+---
+
+- name: Set fact working_dir
+  ansible.builtin.set_fact:
+    working_dir: "/tmp/matomo-geoip-working-dir-{{ ansible_date_time.date }}"
+
+- name: Set fact archive_file
+  ansible.builtin.set_fact:
+    archive_file: "{{ working_dir }}/{{ matomo_task_geo_source_file }}"
+
+- name: Local prepare to provide database
+  delegate_to: localhost
+  block:
+    - name: Create working directory
+      ansible.builtin.file:
+        path: '{{ working_dir }}'
+        state: directory
+        mode: 0755
+        owner: root
+        group: root
+
+    - name: Get archive file info
+      ansible.builtin.stat:
+        path: '{{ archive_file }}'
+        get_checksum: false
+      register: archive_file_exists
+
+    - name: Download DBIP archive file
+      ansible.builtin.get_url:
+        url: '{{ matomo_task_geo_url }}'
+        dest: '{{ archive_file }}.gz'
+        mode: 0644
+        owner: root
+        group: root
+      when: not archive_file_exists.stat.exists
+
+    # there is not ansible command for gunzip at the moment
+    # @see https://github.com/ansible/ansible/pull/23048
+    # - name: Uncompress archive file
+    #   uncompress:
+    #     src: '{{ archive_file }}'
+    - name: Uncompress archive file
+      ansible.builtin.command: gunzip '{{ archive_file }}.gz'
+      when: not archive_file_exists.stat.exists
+
+- name: Sync {{ matomo_task_geo_target_file }}
+  ansible.builtin.copy:
+    src: '{{ working_dir }}/{{ matomo_task_geo_source_file }}'
+    dest: '{{ matomo_dir }}/misc/{{ matomo_task_geo_target_file }}'
+    owner: '{{ matomo_user }}'
+    group: '{{ matomo_user }}'
+    mode: 0644
+    force: true
+  become: "{{ matomo_task_become | default(omit) }}"
+  become_user: '{{ matomo_task_become_user | default(omit) }}'

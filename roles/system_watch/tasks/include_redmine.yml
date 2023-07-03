@@ -1,0 +1,73 @@
+---
+
+- name: Set instance variables
+  ansible.builtin.set_fact:
+    instance: "{{ r_instance.value }}"
+    instance_name: "{{ r_instance.key }}"
+
+- name: Set redmine_dir variable
+  ansible.builtin.set_fact:
+    redmine_dir: '{{ instance.dir | default("/srv/" + instance_name + "/redmine") }}'
+
+# git_config does not support multiple values
+# see https://docs.ansible.com/ansible/2.9/modules/git_config_module.html
+- name: Add git safe directory - {{ instance_name }}
+  ansible.builtin.command: git config --global --replace-all safe.directory {{ redmine_dir }}
+  when: system_watch_add_git_safe_directory
+
+- name: Set redmine_rails_env variable
+  ansible.builtin.set_fact:
+    redmine_rails_env: "{{ instance.rails_env | default(rails_env) }}"
+
+- name: Log redmine gem metadata - {{ instance_name }}
+  ansible.builtin.shell: bash -lc "gem list > /run/{{ instance_name }}/redmine_info.txt"
+  args:
+    chdir: '{{ redmine_dir }}'
+  changed_when: false
+  become: true
+  become_user: '{{ instance_name }}'
+
+- name: Log redmine metadata - {{ instance_name }}
+  ansible.builtin.shell: bash -lc "bin/about >> /run/{{ instance_name }}/redmine_info.txt"
+  args:
+    chdir: '{{ redmine_dir }}'
+  environment:
+    RAILS_ENV: '{{ redmine_rails_env }}'
+  changed_when: false
+  become: true
+  become_user: '{{ instance_name }}'
+
+- name: Copy redmine metadata to git - {{ instance_name }}
+  ansible.posix.synchronize:
+    mode: pull
+    src: /run/{{ instance_name }}/redmine_info.txt
+    dest: "{{ system_watch_log_dir }}/{{ '' if instance_name == 'redmine' else 'redmine_' }}{{ instance_name }}.txt"
+    # NOTE: workaroud for string problem
+    # @SEE https://github.com/ansible-collections/ansible.posix/issues/376#issuecomment-1222046195
+    dest_port: "{{ lookup('ansible.builtin.vars', 'ansible_port', default=22) }}"
+  changed_when: false
+  delegate_to: "{{ inventory_hostname }}"
+
+- name: Add redmine info for branches - {{ instance_name }}
+  ansible.builtin.shell: 'echo "Branches:" > {{ system_watch_log_dir }}/git_status_{{ instance_name }}.txt'
+  changed_when: false
+
+- name: Log current redmine git branches - {{ instance_name }}
+  ansible.builtin.shell: "git --work-tree={{ redmine_dir }} branch -a >> {{ system_watch_log_dir }}/git_status_{{ instance_name }}.txt"
+  changed_when: false
+  args:
+    chdir: '{{ redmine_dir }}'
+
+- name: Add empty line - {{ instance_name }}
+  ansible.builtin.shell: 'echo "" >> {{ system_watch_log_dir }}/git_status_{{ instance_name }}.txt'
+  changed_when: false
+
+- name: Add redmine info for change status - {{ instance_name }}
+  ansible.builtin.shell: 'echo "Changes:" >> {{ system_watch_log_dir }}/git_status_{{ instance_name }}.txt'
+  changed_when: false
+
+- name: Log redmine git status - {{ instance_name }}
+  ansible.builtin.shell: "git --work-tree={{ redmine_dir }} status -s >> {{ system_watch_log_dir }}/git_status_{{ instance_name }}.txt"
+  changed_when: false
+  args:
+    chdir: '{{ redmine_dir }}'

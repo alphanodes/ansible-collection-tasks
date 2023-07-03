@@ -1,0 +1,21 @@
+---
+
+- name: Set automation_task - {{ instance_name }}
+  ansible.builtin.set_fact:
+    automation_task: "{{ instance.automation_task | default(redmine_automation_task) }}"
+
+- name: Run automation jobs - {{ instance_name }}
+  ansible.builtin.command: bash -lc "bundle exec rake redmine:automation:{{ automation_task }}"
+  args:
+    chdir: '{{ redmine_app_dir }}'
+  become: true
+  become_user: '{{ redmine_user }}'
+  environment:
+    RAILS_ENV: '{{ redmine_rails_env }}'
+    LOG_TO_STDOUT: '1'
+  register: automation_jobs
+
+- name: Output of automation jobs - {{ instance_name }}
+  ansible.builtin.debug:
+    var: automation_jobs.stdout_lines
+  when: automation_jobs.stdout_lines | length

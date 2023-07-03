@@ -1,0 +1,11 @@
+---
+
+- name: Set repo_url - {{ repo_spec.name }}
+  ansible.builtin.set_fact:
+    repo_url: '{{ repo_spec.repo }}/trunk'
+
+- name: Mirror svn repository - {{ repo_spec.name }}
+  ansible.builtin.command: git svn init -s {{ repo_url }}
+  args:
+    chdir: '{{ git_mirrors_root }}'
+  ignore_errors: true

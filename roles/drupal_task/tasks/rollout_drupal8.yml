@@ -1,0 +1,32 @@
+---
+- name: Run config import
+  when: >
+    ( instance.with_cim is defined and instance.with_cim )
+    or drupal_rollout_with_cim
+  block:
+    - name: Run config import - {{ instance.name }}
+      ansible.builtin.command: '{{ instance.drush_path | default(drush_path) }} @{{ instance.name }} --yes cim'
+      args:
+        chdir: "{{ instance.dir }}{{ instance.vhost_dir | default(drupal_vhost_dir) }}"
+      register: cim_result
+      changed_when: cim_result.rc != 0
+
+    - name: Output of config import - {{ instance.name }}
+      ansible.builtin.debug:
+        var: cim_result.stdout_lines
+      when: cim_result.stdout_lines | length
+
+- name: Run cache-rebuild
+  when: >
+    rollout_with_cache_clear
+    and (mysql_replication_role is undefined or mysql_replication_role == 'master')
+    and sync_master is undefined
+  block:
+    - name: Run cache-rebuild - {{ instance.name }}
+      ansible.builtin.command: '{{ instance.drush_path | default(drush_path) }} @{{ instance.name }} cache-rebuild'
+      register: cache_result
+
+    - name: Output of cache-rebuild - {{ instance.name }}
+      ansible.builtin.debug:
+        var: cache_result.stdout_lines
+      when: cache_result.stdout_lines | length

@@ -1,0 +1,41 @@
+---
+- name: Converge
+  hosts: all
+  collections:
+      - alphanodes.tasks
+
+  pre_tasks:
+    - name: Update apt cache.
+      ansible.builtin.apt:
+        update_cache: yes
+        cache_valid_time: 600
+      changed_when: false
+
+    - name: Install cron.
+      ansible.builtin.apt:
+        name: git
+        state: present
+
+    - name: Set email for git
+      ansible.builtin.command: git config --global user.email "me@home.com"
+
+    - name: Set name for git
+      ansible.builtin.command: git config --global user.user "Just Me"
+
+    - name: Set default branch
+      ansible.builtin.command: git config --global init.defaultBranch "main"
+
+    - name: Create local git repo for tests
+      ansible.builtin.shell: >
+        mkdir /git_repo &&
+        touch /git_repo/dummy.txt &&
+        cd /git_repo &&
+        git init &&
+        git add -A &&
+        git commit -m 'first commit'
+
+  vars:
+    system_watch_repo: file://git_repo
+
+  roles:
+    - role: alphanodes.tasks.system_watch

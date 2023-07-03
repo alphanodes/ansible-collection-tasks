@@ -1,0 +1,69 @@
+---
+# defaults file for redmine_tasks
+
+# possible values: see vars/main.yml
+redmine_task_name: ''
+
+# if not specified, all instances specified in redmine_instances are used
+# overwrite it!
+# redmine_task_instance: 'redmine'
+
+redmine_base_dir: /srv
+redmine_app_dir_name: redmine
+
+redmine_automation_task: jobs
+
+# if true, if multiple instances are defined, jobs are run for all instances
+# if false, all jobs are disabled and you have to activivate it manuallay for
+# each required instance with .with_TAST_NAME_task: true
+# e.g. .with_automation_task: true or with_maintainance_task: true
+redmine_task_multi_instance_default: true
+
+# URL to Redmine (without backslash)
+redmine_helpdesk_mailer_url: ''
+# Enable WS for incoming emails and genertate API key
+# see https://www.redminecrm.com/projects/helpdesk/pages/6
+redmine_helpdesk_mailer_key: ''
+# for basic auth
+redmine_helpdesk_mailer_auth_user:
+redmine_helpdesk_mailer_auth_password:
+
+# type of redmine plugin: redmineup or servicedesk
+redmine_helpdesk_type: redmineup
+
+redmine_task_reminder_day: 7
+
+# redmine_receive_mails:
+#  - name: Redmine IMAP account
+#    host: 192.168.0.1
+#    user: noreply
+#    password: tryme
+#    # imap or pop3
+#    protocol: imap
+#    delete_unprocessed: true
+#    allow_override: 'priority,tracker,project,category'
+
+redmine_receive_mails: []
+
+# redmine_receive_mails defaults
+redmine_receive_mails_no_log: true
+redmine_receive_mails_host: ''
+redmine_receive_mails_user: ''
+redmine_receive_mails_password: ''
+redmine_receive_mails_protocol: imap
+redmine_receive_mails_port: 993
+redmine_receive_mails_ssl: true
+redmine_receive_mails_options: ''
+redmine_receive_mails_allow_override: 'status,priority,assigned_to,estimated_hours,done_ratio,category,fixed_version,due_date,start_date'
+
+rails_env: production
+
+# if sync_master is defined, task will be skipped
+# (can be used in replication environments)
+# sync_master: anything
+
+# see https://www.redmine.org/projects/redmine/wiki/RedmineRake
+redmine_maintenance_tasks:
+  - 'redmine:attachments:prune'
+  - 'redmine:tokens:prune'
+#  - 'redmine:watchers:prune'

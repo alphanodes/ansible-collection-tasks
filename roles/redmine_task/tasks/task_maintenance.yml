@@ -1,0 +1,11 @@
+---
+
+- name: Set maintenance_tasks - {{ instance_name }}
+  ansible.builtin.set_fact:
+    maintenance_tasks: "{{ instance.maintenance_tasks | default(redmine_maintenance_tasks) }}"
+
+- name: Include maintenance tasks - {{ instance_name }}
+  ansible.builtin.include_tasks: task_maintenance_task.yml
+  loop: "{{ maintenance_tasks | default([]) }}"
+  loop_control:
+    loop_var: task

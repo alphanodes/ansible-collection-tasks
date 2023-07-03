@@ -1,0 +1,22 @@
+---
+
+# @see https://www.postgresql.org/docs/12/sql-vacuum.html
+# @see https://gist.github.com/mmrwoods/1647442
+
+- name: Include stat tasks
+  ansible.builtin.include_tasks: task_postgres_vacuum_stats.yml
+  loop: "{{ system_task_postgres_database_stats }}"
+  loop_control:
+    loop_var: database
+  when: not system_task_postgres_quiet
+
+- name: Run Postgres vacuumdb
+  ansible.builtin.command: vacuumdb {{ system_task_postgres_vacuum_options }}
+  become: "{{ true if system_task_postgres_user != '' else false }}"
+  become_user: '{{ system_task_postgres_user | default(omit) }}'
+  register: postgres_vacuumdb
+
+- name: Output of postgres_vacuumdb
+  ansible.builtin.debug:
+    var: postgres_vacuumdb.stdout_lines
+  when: not system_task_postgres_quiet and postgres_vacuumdb.changed

@@ -1,0 +1,15 @@
+---
+
+- name: Run pgbadger
+  ansible.builtin.command: 'pgbadger {{ system_task_pgbadger_query_options }} -q {{ system_task_pgbadger_query_log }} -O {{ system_task_pgbadger_query_outdir }}'
+  register: pgbadger_result
+
+- name: Script output
+  ansible.builtin.debug:
+    var: pgbadger_result.stdout_lines
+  when: pgbadger_result is defined and pgbadger_result.stdout_lines | length
+
+- name: Script errors
+  ansible.builtin.debug:
+    var: pgbadger_result.stderr_lines
+  when: pgbadger_result is defined and pgbadger_result.stderr_lines | length

@@ -1,0 +1,25 @@
+---
+- name: Set stamps
+  ansible.builtin.set_fact:
+    date_stamp: "{{ lookup('pipe', 'date +%Y%m%d%H%M') }}"
+    day_stamp: "{{ lookup('pipe', 'date +%Y%m%d') }}"
+
+- name: Ensures backup_dir exists
+  tags: backup
+  ansible.builtin.file:
+    path: '{{ lxc_backup_dir }}'
+    state: directory
+    mode: 0755
+
+- name: Include clear tasks
+  ansible.builtin.include_tasks: clear.yml
+  tags: backup
+
+- name: Include lxc tasks
+  ansible.builtin.include_tasks: lxc.yml
+  tags: backup
+  loop: "{{ lxc_backup_sets | default([]) }}"
+  loop_control:
+    loop_var: instance
+  when: >
+    lxc_backup_set_name == '' or lxc_backup_set_name == instance.name

@@ -1,0 +1,26 @@
+---
+
+- name: Check redmine_task_name
+  ansible.builtin.fail:
+    msg: 'redmine_task_name is required'
+  when: redmine_task_name == ''
+  tags:
+    - redmine
+
+- name: Check if redmine_task_name is valid
+  ansible.builtin.fail:
+    msg: 'redmine_task_name is not support. See vars/main.yml for supported tasks'
+  when: redmine_task_name not in redmine_available_tasks
+  tags:
+    - redmine
+
+- name: Include instance tasks
+  ansible.builtin.include_tasks: instance.yml
+  loop: "{{ redmine_instances | dict2items }}"
+  loop_control:
+    loop_var: r_instance
+  when:
+    - redmine_task_instance is defined and redmine_task_instance == r_instance.key or redmine_task_instance is undefined
+    - r_instance.value.state is undefined or r_instance.value.state == 'active' or r_instance.value.state == 'prepare_only'
+  tags:
+    - redmine

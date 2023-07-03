@@ -1,0 +1,16 @@
+---
+
+- name: Run matomo console task - {{ matomo_console_name }}
+  ansible.builtin.shell: "php console --no-ansi -n {{ matomo_console_name }}{{ '' if matomo_domain == '' else ' --matomo-domain=' + matomo_domain }}"
+  args:
+    executable: /usr/bin/bash
+    chdir: "{{ matomo_dir }}"
+  become: "{{ true if matomo_user is defined else false }}"
+  become_user: '{{ matomo_user | default(omit) }}'
+  register: console_result
+  when: (mysql_replication_role is undefined or mysql_replication_role == 'master') and (sync_master is undefined)
+
+- name: Output of console - {{ matomo_console_name }}
+  ansible.builtin.debug:
+    var: console_result.stdout_lines
+  when: console_result.stdout_lines is defined and console_result.stdout_lines | length

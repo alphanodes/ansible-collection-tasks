@@ -1,0 +1,41 @@
+---
+
+- name: Set facts
+  ansible.builtin.set_fact:
+    jekyll_dir: "{{ instance.dir | default(jekyll_base_dir + '/' + instance.name) }}"
+    jekyll_env: "{{ instance.jekyll_env | default(jekyll_env) }}"
+
+- name: Install jekyll JEKYLL_ENV={{ jekyll_env }}
+  ansible.builtin.git:
+    repo: '{{ instance.repo }}'
+    dest: '{{ jekyll_dir }}'
+    version: '{{ instance.repo_version | default(omit) }}'
+    accept_hostkey: true
+  notify: Run bundle update for jekyll
+
+- name: Install bundler - {{ instance.name }}
+  community.general.gem:
+    name: bundler
+    state: present
+
+- name: Run Jekyll clean - {{ instance.name }}
+  ansible.builtin.command: bundle exec jekyll clean
+  args:
+    chdir: '{{ jekyll_dir }}'
+  environment:
+    JEKYLL_ENV: '{{ jekyll_env }}'
+
+- name: Run Jekyll build - {{ instance.name }}
+  ansible.builtin.command: "bundle exec jekyll build"
+  environment:
+    JEKYLL_ENV: '{{ jekyll_env }}'
+  args:
+    chdir: '{{ jekyll_dir }}'
+
+- name: Run Jekyll remove old release dir - {{ instance.name }}
+  ansible.builtin.file:
+    path: '{{ jekyll_dir }}/{{ jekyll_site_prod }}'
+    state: absent
+
+- name: Run Jekyll release dir - {{ instance.name }}
+  ansible.builtin.command: mv {{ jekyll_dir }}/_site {{ jekyll_dir }}/{{ jekyll_site_prod }}

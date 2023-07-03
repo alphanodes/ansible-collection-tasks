@@ -1,0 +1,8 @@
+---
+- name: Converge
+  hosts: all
+  collections:
+      - alphanodes.tasks
+
+  roles:
+    - role: alphanodes.tasks.nextcloud_task

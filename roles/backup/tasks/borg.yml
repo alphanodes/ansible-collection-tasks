@@ -1,0 +1,44 @@
+---
+- name: Include borg binary tasks
+  ansible.builtin.include_tasks: borg_from_binary.yml
+
+- name: Include borg package tasks
+  ansible.builtin.include_tasks: borg_from_package.yml
+
+- name: Set facts borg_binary
+  ansible.builtin.set_fact:
+    borg_binary: "{{ backup_borg_binary if backup_borg_install_from_binary else '/usr/bin/borg' }}"
+
+- name: Run REPO1 tasks
+  when: backup_borg_repo != ''
+  block:
+    - name: Check passphrase for REPO1
+      ansible.builtin.fail:
+        msg: 'backup_borg_repo requires to set backup_borg_passphrase, too'
+      when: backup_borg_passphrase == ''
+
+    - name: Set facts borg_repo for REPO1
+      ansible.builtin.set_fact:
+        borg_repo_name: 'REPO1'
+        borg_repo: "{{ backup_borg_repo }}"
+        borg_passphrase: "{{ backup_borg_passphrase }}"
+
+    - name: Include Repo tasks for REPO1
+      ansible.builtin.include_tasks: borg_repo.yml
+
+- name: Run REPO2 tasks
+  when: backup_borg_repo2 != ''
+  block:
+    - name: Check passphrase for REPO2
+      ansible.builtin.fail:
+        msg: 'backup_borg_repo2 requires to set backup_borg_passphrase2, too'
+      when: backup_borg_passphrase2 == ''
+
+    - name: Set facts borg_repo for REPO2
+      ansible.builtin.set_fact:
+        borg_repo_name: 'REPO2'
+        borg_repo: "{{ backup_borg_repo2 }}"
+        borg_passphrase: "{{ backup_borg_passphrase2 }}"
+
+    - name: Include Repo tasks for REPO2
+      ansible.builtin.include_tasks: borg_repo.yml

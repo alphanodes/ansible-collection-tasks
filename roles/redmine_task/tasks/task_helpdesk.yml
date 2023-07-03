@@ -1,0 +1,62 @@
+---
+
+- name: Set helpdesk_type - {{ instance_name }}
+  ansible.builtin.set_fact:
+    helpdesk_type: "{{ instance.helpdesk_type | default(redmine_helpdesk_type) }}"
+
+- name: Set helpdesk_mailer_auth_user - {{ instance_name }}
+  ansible.builtin.set_fact:
+    helpdesk_mailer_auth_user: "{{ instance.helpdesk_mailer_auth_user | default(redmine_helpdesk_mailer_auth_user) }}"
+
+- name: Set helpdesk_mailer_auth_password - {{ instance_name }}
+  ansible.builtin.set_fact:
+    helpdesk_mailer_auth_password: "{{ instance.helpdesk_mailer_auth_password | default(redmine_helpdesk_mailer_auth_password) }}"
+
+- name: Set helpdesk_mailer_url - {{ instance_name }}
+  ansible.builtin.set_fact:
+    helpdesk_mailer_url: "{{ instance.helpdesk_mailer_url | default(redmine_helpdesk_mailer_url) }}"
+
+- name: Check helpdesk_mailer_url - {{ instance_name }}
+  ansible.builtin.fail:
+    msg: 'helpdesk_mailer_url is missing'
+  when: helpdesk_mailer_url == ''
+
+- name: Set helpdesk_mailer_key - {{ instance_name }}
+  ansible.builtin.set_fact:
+    helpdesk_mailer_key: "{{ instance.helpdesk_mailer_key | default(redmine_helpdesk_mailer_key) }}"
+
+- name: Check helpdesk_mailer_key - {{ instance_name }}
+  ansible.builtin.fail:
+    msg: 'helpdesk_mailer_key is missing'
+  when: helpdesk_mailer_key == ''
+
+- name: Set helpdesk url for redmineup plugin - {{ instance_name }}
+  ansible.builtin.set_fact:
+    helpdesk_url: "{{ helpdesk_mailer_url }}/helpdesk_mailer/get_mail?key={{ helpdesk_mailer_key }}"
+  when: helpdesk_type != 'servicedesk'
+
+- name: Set helpdesk url for servicedesk plugin - {{ instance_name }}
+  ansible.builtin.set_fact:
+    helpdesk_url: "{{ helpdesk_mailer_url }}/helpdesk_mailer/fetch_mail?key={{ helpdesk_mailer_key }}"
+  when: helpdesk_type == 'servicedesk'
+
+- name: Poll helpdesk mails - {{ instance_name }}
+  ansible.builtin.uri:
+    url: "{{ helpdesk_url }}"
+    force_basic_auth: "{{ true if helpdesk_mailer_auth_user is defined else false }}"
+    user: '{{ helpdesk_mailer_auth_user | default(omit) }}'
+    password: '{{ helpdesk_mailer_auth_password | default(omit) }}'
+    return_content: true
+    body_format: json
+    validate_certs: false
+  changed_when: (json_response.content|from_json)['count'] is defined and (json_response.content|from_json)['count'] > 0
+  register: json_response
+
+- name: Output of json_response - {{ instance_name }}
+  ansible.builtin.debug:
+    var: json_response.content
+
+- name: Test for failure of poll mails - {{ instance_name }}
+  ansible.builtin.fail:
+    msg: "Errors found."
+  when: (json_response.content|from_json)['errors'] | length

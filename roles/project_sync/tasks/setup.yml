@@ -1,0 +1,5 @@
+---
+- name: Be sure rsync is installed
+  ansible.builtin.apt:
+    name: rsync
+    state: present

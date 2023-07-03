@@ -1,0 +1,17 @@
+---
+# tasks for https://github.com/AlphaNodes/redmine_postgresql_search
+
+- name: Rebuild search index - {{ instance_name }}
+  ansible.builtin.command: bash -lc "bundle exec rake redmine_postgresql_search:rebuild_index"
+  args:
+    chdir: '{{ redmine_app_dir }}'
+  become: true
+  become_user: '{{ redmine_user }}'
+  environment:
+    RAILS_ENV: '{{ redmine_rails_env }}'
+  register: rebuild_index
+
+- name: Output of rebuild_index - {{ instance_name }}
+  ansible.builtin.debug:
+    var: rebuild_index.stdout_lines
+  when: rebuild_index.stdout_lines | length

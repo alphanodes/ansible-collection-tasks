@@ -1,0 +1,47 @@
+---
+- name: Set fact with_stop
+  ansible.builtin.set_fact:
+    with_stop: "{{ instance.with_stop | default(lxc_backup_with_stop) }}"
+
+- name: Stop block
+  when: with_stop
+  block:
+    - name: Stop container - {{ instance.name }}
+      ansible.builtin.command: lxc-stop --name {{ instance.name }}
+
+    - name: Wait to continue - {{ instance.name }}
+      ansible.builtin.pause:
+        seconds: '{{ lxc_backup_wait_seconds }}'
+
+- name: Ensures mount point exists - {{ instance.name }}
+  ansible.builtin.file:
+    path: '{{ lxc_backup_mount_parent_dir }}/{{ instance.name }}'
+    state: directory
+    mode: 0755
+
+- name: Mount lxc container - {{ instance.name }}
+  ansible.posix.mount:
+    name: '{{ lxc_backup_mount_parent_dir }}/{{ instance.name }}'
+    src: /dev/{{ lxc_backup_vg_name }}/{{ instance.name }}
+    fstype: '{{ lxc_backup_mount_fstype }}'
+    opts: '{{ lxc_backup_mount_opts }}'
+    state: mounted
+
+# see https://docs.ansible.com/ansible/latest/collections/community/general/archive_module.html
+# TODO: tar should use this option, but how with community.general.archive: --numeric-owner
+- name: Create backup of files/directories - {{ instance.name }}
+  community.general.archive:
+    path: '{{ lxc_backup_mount_parent_dir }}/{{ instance.name }}'
+    dest: '{{ lxc_backup_dir }}/lxc-{{ instance.name }}-{{ date_stamp }}.tar.gz'
+    format: gz
+    mode: 0644
+    unsafe_writes: '{{ False if with_stop else True }}'
+
+- name: Unmount lxc container - {{ instance.name }}
+  ansible.posix.mount:
+    name: '{{ lxc_backup_mount_parent_dir }}/{{ instance.name }}'
+    state: unmounted
+
+- name: Start container - {{ instance.name }}
+  ansible.builtin.command: lxc-start --name {{ instance.name }}
+  when: with_stop

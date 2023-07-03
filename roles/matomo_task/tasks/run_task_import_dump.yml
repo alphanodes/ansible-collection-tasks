@@ -1,0 +1,55 @@
+---
+
+- name: Check if matomo_db_dump is specified
+  ansible.builtin.fail:
+    msg: 'matomo_db_dump is required.'
+  when: matomo_db_dump is undefined or matomo_db_dump == ''
+
+- name: Get if of db dump
+  ansible.builtin.stat:
+    path: '{{ matomo_db_dump }}'
+    get_checksum: false
+  register: db_dump_exists
+
+- name: Check if matomo dump file exists
+  ansible.builtin.fail:
+    msg: 'matomo_db_dump {{ matomo_db_dump }} does not exist!'
+  when: not db_dump_exists.stat.exists
+
+- name: Drop existing database
+  community.mysql.mysql_db:
+    name: '{{ matomo_db_name }}'
+    state: absent
+
+- name: Pause 30 seconds
+  ansible.builtin.pause:
+    seconds: 30
+
+- name: Create new database
+  community.mysql.mysql_db:
+    name: '{{ matomo_db_name }}'
+    state: present
+
+- name: Import matomo database
+  community.mysql.mysql_db:
+    name: '{{ matomo_db_name }}'
+    state: import
+    target: '{{ matomo_db_dump }}'
+
+- name: Run matomo console core:update
+  ansible.builtin.shell: "php console --no-ansi -n core:update --yes"
+  args:
+    executable: /usr/bin/bash
+    chdir: "{{ matomo_dir }}"
+  become: "{{ true if matomo_user is defined else false }}"
+  become_user: '{{ matomo_user | default(omit) }}'
+  when: (mysql_replication_role is undefined or mysql_replication_role == 'master') and (sync_master is undefined)
+
+- name: Run matomo console database:optimize-archive-tables
+  ansible.builtin.shell: "php console --no-ansi -n database:optimize-archive-tables all"
+  args:
+    executable: /usr/bin/bash
+    chdir: "{{ matomo_dir }}"
+  become: "{{ true if matomo_user is defined else false }}"
+  become_user: '{{ matomo_user | default(omit) }}'
+  when: (mysql_replication_role is undefined or mysql_replication_role == 'master') and (sync_master is undefined)

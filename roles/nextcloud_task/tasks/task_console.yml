@@ -1,0 +1,19 @@
+---
+
+- name: Check nextcloud_console_command
+  ansible.builtin.fail:
+    msg: 'nextcloud_console_command is required for console task'
+  when: nextcloud_console_command == ''
+
+- name: Run nextcloud console occ {{ nextcloud_console_command }}
+  ansible.builtin.command: 'php ./occ {{ nextcloud_console_command }}'
+  args:
+    chdir: '{{ nextcloud_htdocs }}'
+  register: console_result
+  become: true
+  become_user: '{{ nextcloud_user }}'
+
+- name: Output of console
+  ansible.builtin.debug:
+    var: console_result.stdout_lines
+  when: console_result.stdout_lines is defined and console_result.stdout_lines | length
