@@ -25,7 +25,7 @@ This collection provides tasks for:
 
 ## Minimum required Ansible-version
 
-- Ansible >= 2.9.15
+- Ansible >= 2.15.0
 
 ## Included content
 

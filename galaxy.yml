@@ -7,7 +7,7 @@ authors:
 description: 'This collection provides application tasks for Debian and Ubuntu'
 license:
   - Apache-2.0
-license_file: ''
+
 tags:
   - application
   - barman
@@ -22,9 +22,10 @@ tags:
   - sphinx
   - sync
   - watch
+
 dependencies:
-  ansible.posix: '>=1.0.0'
-  community.general: '>=1.0.0'
+  ansible.posix: '>=1.4.0'
+
 repository: 'https://github.com/alphanodes/ansible-collection-tasks/'
 homepage: 'https://alphanodes.com'
 issues: 'https://github.com/alphanodes/ansible-collection-tasks/issues'
