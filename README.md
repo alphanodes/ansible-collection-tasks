@@ -11,7 +11,7 @@
 [![alphanodes.tasks.nextcloud_task](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/nextcloud_task.yml/badge.svg)](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/nextcloud_task.yml)
 [![alphanodes.tasks.project_sync](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/project_sync.yml/badge.svg)](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/project_sync.yml)
 [![alphanodes.tasks.redmine_task](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/redmine_task.yml/badge.svg)](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/redmine_task.yml)
-[[!alphanodes.tasks.sphinx_rollout](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/sphinx_rollout.yml/badge.svg)](<https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/sphinx_rollout.yml>)
+[![alphanodes.tasks.sphinx_rollout](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/sphinx_rollout.yml/badge.svg)](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/sphinx_rollout.yml)
 [![alphanodes.tasks.system_task](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/system_task.yml/badge.svg)](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/system_task.yml)
 [![alphanodes.tasks.system_watch](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/system_watch.yml/badge.svg)](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/system_watch.yml)
 
