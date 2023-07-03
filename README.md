@@ -29,20 +29,20 @@ This collection provides tasks for:
 
 ## Included content
 
-- [alphanodes.tasks.backup](roles/backup/)
-- [alphanodes.tasks.barman](roles/barman/)
-- [alphanodes.tasks.drupal_task](roles/drupal_task/)
-- [alphanodes.tasks.git_mirror](roles/git_mirror/)
-- [alphanodes.tasks.git_rollout](roles/git_rollout/)
-- [alphanodes.tasks.jekyll_rollout](roles/jekyll_rollout/)
-- [alphanodes.tasks.lxc_backup](roles/lxc_backup/)
-- [alphanodes.tasks.matomo_task](roles/matomo_task/)
-- [alphanodes.tasks.nextcloud_task](roles/nextcloud_task/)
-- [alphanodes.tasks.project_sync](roles/project_sync/)
-- [alphanodes.tasks.redmine_task](roles/redmine_task/)
-- [alphanodes.tasks.sphinx_rollout](roles/sphinx_rollout/)
-- [alphanodes.tasks.system_task](roles/system_task/)
-- [alphanodes.tasks.system_watch](roles/system_watch/)
+- [![alphanodes.tasks.backup](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/backup.yml/badge.svg)](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/backup.yml)
+- [![alphanodes.tasks.barman](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/barman.yml/badge.svg)](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/barman.yml)
+- [![alphanodes.tasks.drupal_task](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/drupal_task.yml/badge.svg)](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/drupal_task.yml)
+- [![alphanodes.tasks.git_mirror](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/git_mirror.yml/badge.svg)](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/git_mirror.yml)
+- [![alphanodes.tasks.git_rollout](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/git_rollout.yml/badge.svg)](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/git_rollout.yml)
+- [![alphanodes.tasks.jekyll_rollout](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/jekyll_rollout.yml/badge.svg)](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/jekyll_rollout.yml)
+- [![alphanodes.tasks.lxc_backup](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/lxc_backup.yml/badge.svg)](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/lxc_backup.yml)
+- [![alphanodes.tasks.matomo_task](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/matomo_task.yml/badge.svg)](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/matomo_task.yml)
+- [![alphanodes.tasks.nextcloud_task](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/nextcloud_task.yml/badge.svg)](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/nextcloud_task.yml)
+- [![alphanodes.tasks.project_sync](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/project_sync.yml/badge.svg)](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/project_sync.yml)
+- [![alphanodes.tasks.redmine_task](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/redmine_task.yml/badge.svg)](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/redmine_task.yml)
+- [[!alphanodes.tasks.sphinx_rollout](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/sphinx_rollout.yml/badge.svg)](<https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/sphinx_rollout.yml>)
+- [![alphanodes.tasks.system_task](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/system_task.yml/badge.svg)](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/system_task.yml)
+- [![alphanodes.tasks.system_watch](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/system_watch.yml/badge.svg)](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/system_watch.yml)
 
 ## Installation
 
