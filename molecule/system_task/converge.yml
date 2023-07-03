@@ -1,8 +1,6 @@
 ---
 - name: Converge
   hosts: all
-  collections:
-      - alphanodes.tasks
 
   vars:
     system_task_name: service_restart
@@ -16,5 +14,5 @@
       changed_when: false
 
   roles:
-    - role: alphanodes.ssh
+    # - role: alphanodes.setup.ssh
     - role: alphanodes.tasks.system_task

@@ -1,5 +1,5 @@
 ---
-name: "alphanodes.tasks.jeykll_rollout"
+name: "alphanodes.tasks.jekyll_rollout"
 'on':
   pull_request:
   push:

@@ -1,8 +1,6 @@
 ---
 - name: Converge
   hosts: all
-  collections:
-      - alphanodes.tasks
 
   roles:
     - role: alphanodes.tasks.git_rollout

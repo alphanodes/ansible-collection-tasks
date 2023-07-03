@@ -1,8 +1,6 @@
 ---
 - name: Converge
   hosts: all
-  collections:
-      - alphanodes.tasks
 
   vars:
     backup_create_hashfiles: true

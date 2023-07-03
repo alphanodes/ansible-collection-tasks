@@ -30,7 +30,7 @@ This collection provides tasks for:
 ## Included content
 
 - [alphanodes.tasks.backup](roles/backup/)
-- [des.tasks.barman](roles/barman/)
+- [alphanodes.tasks.barman](roles/barman/)
 - [alphanodes.tasks.drupal_task](roles/drupal_task/)
 - [alphanodes.tasks.git_mirror](roles/git_mirror/)
 - [alphanodes.tasks.git_rollout](roles/git_rollout/)
