@@ -14,8 +14,11 @@ on:  # yamllint disable-line rule:truthy
       - 'roles/**'
 
 jobs:
-  ansible-lint:
+  build:
     runs-on: ubuntu-latest
+    env:
+      PY_COLORS: 1
+      ANSIBLE_FORCE_COLOR: 1
 
     steps:
       # Important: This sets up your GITHUB_WORKSPACE environment variable

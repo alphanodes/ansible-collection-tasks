@@ -5,15 +5,22 @@ name: "alphanodes.tasks.sphinx_rollout"
   push:
     branches:
       - main
+    paths:
+      - 'roles/sphinx_rollout/**'
+      - 'molecule/sphinx_rollout/**'
+      - '.github/workflows/sphinx_rollout.yml'
 
 defaults:
   run:
     working-directory: 'AlphaNodes.sphinx_rollout'
 
 jobs:
-  molecule:
-    name: Molecule
+  build:
     runs-on: ubuntu-latest
+    env:
+      PY_COLORS: 1
+      ANSIBLE_FORCE_COLOR: 1
+
     strategy:
       matrix:
         distro:
@@ -35,8 +42,8 @@ jobs:
         run: pip3 install ansible molecule molecule-plugins[docker] docker
 
       - name: Run Molecule tests.
-        run: molecule test
+        run: |
+          molecule --version
+          molecule test -s sphinx_rollout
         env:
-          PY_COLORS: '1'
-          ANSIBLE_FORCE_COLOR: '1'
           MOLECULE_DISTRO: ${{ matrix.distro }}

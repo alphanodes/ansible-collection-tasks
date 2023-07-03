@@ -1,6 +1,8 @@
 ---
 dependency:
   name: galaxy
+  options:
+    role-file: molecule/system_task/requirements.yml
 driver:
   name: docker
 platforms:
@@ -13,5 +15,10 @@ platforms:
     pre_build_image: true
 provisioner:
   name: ansible
+  options:
+    diff: true
+  config_options:
+    defaults:
+      interpreter_python: auto_silent
   playbooks:
     converge: ${MOLECULE_PLAYBOOK:-converge.yml}

@@ -5,15 +5,22 @@ name: "alphanodes.tasks.lxc_backup"
   push:
     branches:
       - main
+    paths:
+      - 'roles/lxc_backup/**'
+      - 'molecule/lxc_backup/**'
+      - '.github/workflows/lxc_backup.yml'
 
 defaults:
   run:
     working-directory: 'AlphaNodes.lxc_backup'
 
 jobs:
-  molecule:
-    name: Molecule
+  build:
     runs-on: ubuntu-latest
+    env:
+      PY_COLORS: 1
+      ANSIBLE_FORCE_COLOR: 1
+
     strategy:
       matrix:
         distro:
@@ -35,8 +42,8 @@ jobs:
         run: pip3 install ansible molecule molecule-plugins[docker] docker
 
       - name: Run Molecule tests.
-        run: molecule test
+        run: |
+          molecule --version
+          molecule test -s lxc_backup
         env:
-          PY_COLORS: '1'
-          ANSIBLE_FORCE_COLOR: '1'
           MOLECULE_DISTRO: ${{ matrix.distro }}

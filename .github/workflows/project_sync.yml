@@ -5,15 +5,22 @@ name: "alphanodes.tasks.project_sync"
   push:
     branches:
       - main
+    paths:
+      - 'roles/project_sync/**'
+      - 'molecule/project_sync/**'
+      - '.github/workflows/project_sync.yml'
 
 defaults:
   run:
     working-directory: 'AlphaNodes.project_sync'
 
 jobs:
-  molecule:
-    name: Molecule
+  build:
     runs-on: ubuntu-latest
+    env:
+      PY_COLORS: 1
+      ANSIBLE_FORCE_COLOR: 1
+
     strategy:
       matrix:
         distro:
@@ -35,8 +42,8 @@ jobs:
         run: pip3 install ansible molecule molecule-plugins[docker] docker
 
       - name: Run Molecule tests.
-        run: molecule test
+        run: |
+          molecule --version
+          molecule test -s project_sync
         env:
-          PY_COLORS: '1'
-          ANSIBLE_FORCE_COLOR: '1'
           MOLECULE_DISTRO: ${{ matrix.distro }}

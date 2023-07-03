@@ -5,15 +5,22 @@ name: "alphanodes.tasks.system_task"
   push:
     branches:
       - main
+    paths:
+      - 'roles/system_task/**'
+      - 'molecule/system_task/**'
+      - '.github/workflows/system_task.yml'
 
 defaults:
   run:
     working-directory: 'AlphaNodes.system_task'
 
 jobs:
-  molecule:
-    name: Molecule
+  build:
     runs-on: ubuntu-latest
+    env:
+      PY_COLORS: 1
+      ANSIBLE_FORCE_COLOR: 1
+
     strategy:
       matrix:
         distro:
@@ -35,8 +42,8 @@ jobs:
         run: pip3 install ansible molecule molecule-plugins[docker] docker
 
       - name: Run Molecule tests.
-        run: molecule test
+        run: |
+          molecule --version
+          molecule test -s system_task
         env:
-          PY_COLORS: '1'
-          ANSIBLE_FORCE_COLOR: '1'
           MOLECULE_DISTRO: ${{ matrix.distro }}

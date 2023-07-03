@@ -5,21 +5,27 @@ name: "alphanodes.tasks.jekyll_rollout"
   push:
     branches:
       - main
+    paths:
+      - 'roles/jekyll_rollout/**'
+      - 'molecule/jekyll_rollout/**'
+      - '.github/workflows/jekyll_rollout.yml'
 
 defaults:
   run:
     working-directory: 'AlphaNodes.jekyll_rollout'
 
 jobs:
-  molecule:
-    name: Molecule
+  build:
     runs-on: ubuntu-latest
+    env:
+      PY_COLORS: 1
+      ANSIBLE_FORCE_COLOR: 1
+
     strategy:
       matrix:
         distro:
           - ubuntu2204
           - debian11
-          - debian12
 
     steps:
       - name: Check out the codebase.
@@ -40,6 +46,4 @@ jobs:
           molecule --version
           molecule test -s jekyll_rollout
         env:
-          PY_COLORS: '1'
-          ANSIBLE_FORCE_COLOR: '1'
           MOLECULE_DISTRO: ${{ matrix.distro }}

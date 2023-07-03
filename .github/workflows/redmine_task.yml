@@ -5,15 +5,22 @@ name: "alphanodes.tasks.redmine_task"
   push:
     branches:
       - main
+    paths:
+      - 'roles/redmine_task/**'
+      - 'molecule/redmine_task/**'
+      - '.github/workflows/redmine_task.yml'
 
 defaults:
   run:
     working-directory: 'AlphaNodes.redmine_task'
 
 jobs:
-  molecule:
-    name: Molecule
+  build:
     runs-on: ubuntu-latest
+    env:
+      PY_COLORS: 1
+      ANSIBLE_FORCE_COLOR: 1
+
     strategy:
       matrix:
         distro:
@@ -35,8 +42,8 @@ jobs:
         run: pip3 install ansible molecule molecule-plugins[docker] docker
 
       - name: Run Molecule tests.
-        run: molecule test
+        run: |
+          molecule --version
+          molecule test -s redmine_task
         env:
-          PY_COLORS: '1'
-          ANSIBLE_FORCE_COLOR: '1'
           MOLECULE_DISTRO: ${{ matrix.distro }}
