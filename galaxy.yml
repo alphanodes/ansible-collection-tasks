@@ -32,9 +32,6 @@ issues: 'https://github.com/alphanodes/ansible-collection-tasks/issues'
 build_ignore:
   - codecov.yml
   - .github
-  - .gitattributes
   - .gitignore
   - requirements.txt
-  - test-requirements.txt
-  - tests
   - .yamllint
