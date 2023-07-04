@@ -4,6 +4,7 @@
 
   vars:
     backup_create_hashfiles: true
+    backup_one_per_day_limit: false
     backup_sets:
       - name: etc
         src: /etc

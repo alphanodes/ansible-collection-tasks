@@ -2,5 +2,8 @@
 - name: Converge
   hosts: all
 
+  vars:
+    drupal_task_name: rollout
+
   roles:
     - role: alphanodes.tasks.drupal_task

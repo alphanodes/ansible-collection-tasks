@@ -4,6 +4,8 @@
 
   vars:
     redmine_task_name: reminder
+    redmine_instances:
+      redmine:
 
   roles:
     - role: alphanodes.tasks.redmine_task
