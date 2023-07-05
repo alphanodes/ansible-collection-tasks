@@ -2,7 +2,6 @@
 dependencies: []
 
 galaxy_info:
-  role_name: barman
   description: Setup barman and run backup with barman
   author: alexandermeindl
   company: AlphaNodes GmbH
