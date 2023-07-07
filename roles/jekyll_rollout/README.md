@@ -2,16 +2,6 @@
 
 Rollout jekyll repositories
 
-## Installation
-
-### Ansible 2+
-
-Using ansible galaxy cli:
-
-```shell
-ansible-galaxy install alphanodes.jekyll_rollout
-```
-
 ## Role Variables
 
 Available variables are listed below, along with default values (see `defaults/main.yml`):
@@ -30,13 +20,5 @@ ruby, bundle and git has to be installed.
         repo: git@github.com:myname/myrepo.git
         repo_version: main
   roles:
-    - alphanodes.jekyll_rollout
+    - alphanodes.tasks.jekyll_rollout
 ```
-
-## License
-
-GPL Version 3
-
-## Author Information
-
-This role was created in 2022 by [AlphaNodes](https://alphanodes.com/).

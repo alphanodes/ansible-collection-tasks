@@ -13,16 +13,6 @@ Run Redmine tasks for an installed redmine (rake tasks)
 
 An installed redmine.
 
-## Installation
-
-### Ansible 2+
-
-Using ansible galaxy cli:
-
-```shell
-ansible-galaxy install alphanodes.redmine_task
-```
-
 ## Example Playbook
 
 ```yaml
@@ -30,13 +20,5 @@ ansible-galaxy install alphanodes.redmine_task
       vars:
         redmine_task_name: reminder
       roles:
-        - alphanodes.redmine_task
+        - alphanodes.tasks.redmine_task
 ```
-
-## License
-
-GPL Version 3
-
-## Author Information
-
-This role was created in 2018 by [AlphaNodes](https://alphanodes.com/).

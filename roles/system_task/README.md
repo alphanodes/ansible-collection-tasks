@@ -2,22 +2,6 @@
 
 Run system tasks for restart services and reboot server
 
-[![Ansible Galaxy](https://img.shields.io/badge/galaxy-alphanodes.system--task-660198.svg)](https://galaxy.ansible.com/AlphaNodes/system-task)
-
-## Dependencies
-
-  none
-
-## Installation
-
-### Ansible 2+
-
-Using ansible galaxy cli:
-
-```shell
-ansible-galaxy install alphanodes.system_task
-```
-
 ## Role Variables
 
 Available variables are listed below, along with default values (see `defaults/main.yml`):
@@ -73,7 +57,7 @@ Name of supervisor job, which should be restarted.
     system_task_name: service_restart
     system_task_service_name: php7.2-fpm
   roles:
-    - alphanodes.system_task
+    - alphanodes.tasks.system_task
 ```
 
 ## Example Playbook for reboot
@@ -83,13 +67,5 @@ Name of supervisor job, which should be restarted.
   vars:
     system_task_name: reboot
   roles:
-    - alphanodes.system_task
+    - alphanodes.tasks.system_task
 ```
-
-## License
-
-GPL Version 3
-
-## Author Information
-
-This role was created in 2018 by [AlphaNodes](https://alphanodes.com/).

@@ -11,16 +11,6 @@ Run Matomo tasks for an installed matomo
 
 An installed redmine.
 
-## Installation
-
-### Ansible 2+
-
-Using ansible galaxy cli:
-
-```shell
-ansible-galaxy install alphanodes.matomo_task
-```
-
 ## Example Playbook
 
 ```yaml
@@ -29,13 +19,5 @@ ansible-galaxy install alphanodes.matomo_task
         matomo_domain: https://my.url-to-matomo.com
         matomo_console_name: core:archive
       roles:
-        - alphanodes.matomo_task
+        - alphanodes.tasks.matomo_task
 ```
-
-## License
-
-GPL Version 3
-
-## Author Information
-
-This role was created in 2019 by [AlphaNodes](https://alphanodes.com/).

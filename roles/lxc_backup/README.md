@@ -6,16 +6,6 @@ Run LXC instance backups on Debian and Ubuntu servers.
 
 Installed LXC
 
-## Installation
-
-### Ansible 2+
-
-Using ansible galaxy cli:
-
-```shell
-ansible-galaxy install alphanodes.lxc_backup
-```
-
 ## Example Playbook
 
 ```yaml
@@ -27,13 +17,5 @@ ansible-galaxy install alphanodes.lxc_backup
           - name: instance2
             with_stop: false
       roles:
-        - alphanodes.lxc_backup
+        - alphanodes.tasks.lxc_backup
 ```
-
-## License
-
-GPL Version 3
-
-## Author Information
-
-This role was created in 2018 by [AlphaNodes](https://alphanodes.com/).

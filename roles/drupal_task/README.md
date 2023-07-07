@@ -38,15 +38,7 @@ Installed Drupal and drush
           - name: drupal2
           - name: drupal_another
       roles:
-        - alphanodes.drupal-task
+        - alphanodes.tasks.drupal-task
 ```
 
 You have to use --extra-vars "drupal_task_instance=NAME"' to rollout a specific instance, if there are more than one instance on a host. For each Drupal instance, it is required that an drush profile already exists with the name of the Drupal instance (e.g. @drupal1, @drupal2 or @drupal_another)
-
-## License
-
-GPL Version 3
-
-## Author Information
-
-This role was created in 2018 by [AlphaNodes](https://alphanodes.com/).

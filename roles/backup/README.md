@@ -4,8 +4,6 @@ Run daily, weekly and monthly backups for files, MySQL databases and PostgreSQL 
 
 Backup rotation is configurable, e.g. you can use [Grandfather-father-son](https://en.wikipedia.org/wiki/Backup_rotation_scheme#Grandfather-father-son)
 
-[![Ansible Galaxy](https://img.shields.io/badge/galaxy-alphanodes.backup-660198.svg)](https://galaxy.ansible.com/AlphaNodes/backup)
-
 ## Dependencies
 
   none
@@ -225,7 +223,7 @@ List of commands, which runs after backup dump has been created.
       - name: etc
         src: /etc
   roles:
-    - alphanodes.backup
+    - alphanodes.tasks.backup
 ```
 
 ## Extendet example Playbook
@@ -249,5 +247,5 @@ List of commands, which runs after backup dump has been created.
           - builds
           - workspace
   roles:
-    - alphanodes.backup
+    - alphanodes.tasks.backup
 ```
