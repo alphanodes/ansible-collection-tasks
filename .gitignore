@@ -1,10 +1,9 @@
-.kitchen
-hosts
-Gemfile.lock
+*~
+.DS_Store
 .venv
 .vscode
-.DS_Store
 /*.retry
-*.tar.gz
+/*.tar.gz
+Gemfile.lock
+hosts
 tmp/
-*~

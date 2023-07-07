@@ -1,7 +1,6 @@
 # Ansible Collection - alphanodes.tasks
 
 [![alphanodes.tasks.backup](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/backup.yml/badge.svg)](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/backup.yml)
-[![alphanodes.tasks.barman](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/barman.yml/badge.svg)](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/barman.yml)
 [![alphanodes.tasks.drupal_task](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/drupal_task.yml/badge.svg)](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/drupal_task.yml)
 [![alphanodes.tasks.git_mirror](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/git_mirror.yml/badge.svg)](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/git_mirror.yml)
 [![alphanodes.tasks.git_rollout](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/git_rollout.yml/badge.svg)](https://github.com/alphanodes/ansible-collection-tasks/actions/workflows/git_rollout.yml)
@@ -30,7 +29,6 @@ This collection provides tasks for:
 ## Included content
 
 - [alphanodes.tasks.backup](roles/backup/)
-- [alphanodes.tasks.barman](roles/barman/)
 - [alphanodes.tasks.drupal_task](roles/drupal_task/)
 - [alphanodes.tasks.git_mirror](roles/git_mirror/)
 - [alphanodes.tasks.git_rollout](roles/git_rollout/)

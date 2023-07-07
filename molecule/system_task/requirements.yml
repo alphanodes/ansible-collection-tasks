@@ -1,2 +1,5 @@
 ---
-- src: alphanodes.ssh
+collections:
+  - name: https://github.com/alphanodes/ansible-collection-setup.git
+    type: git
+    version: main

@@ -1,0 +1,13 @@
+---
+# see default: https://github.com/adrienverge/yamllint/blob/master/yamllint/conf/default.yaml
+extends: default
+
+rules:
+  line-length: disable
+  new-lines: {type: unix}
+  braces: {max-spaces-inside: 1, level: error}
+  brackets: {max-spaces-inside: 1, level: error}
+  comments-indentation: disable
+  # indentation: disable
+  #  key-duplicates: enable
+  #  truthy: disable

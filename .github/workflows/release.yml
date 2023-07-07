@@ -13,7 +13,7 @@ name: Release
 
 defaults:
   run:
-    working-directory: 'AlphaNodes.tasks'
+    working-directory: 'alphanodes.tasks'
 
 jobs:
   release:
