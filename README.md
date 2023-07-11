@@ -44,9 +44,13 @@ This collection provides tasks for:
 
 ## Installation
 
-Install the collection via ansible-galaxy:
+Install the collection via ansible-galaxy (this is not working at moment because of <https://github.com/ansible/galaxy/issues/3191>):
 
 `ansible-galaxy collection install alphanodes.tasks`
+
+or
+
+`ansible-galaxy collection install git+https://github.com/alphanodes/ansible-collection-tasks.git,main`
 
 ## Using this collection
 

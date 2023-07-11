@@ -6,3 +6,5 @@ sphinx_rollout_instance: ''
 sphinx_base_dir: /srv/sphinx
 sphinx_build_prod: _build_prod
 sphinx_always_build: true
+
+sphinx_bin_path: /usr/local/bin
