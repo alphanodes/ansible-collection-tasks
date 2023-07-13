@@ -13,7 +13,8 @@ sphinx and git has to be installed.
 ## Example Playbook
 
 ```yaml
-- hosts: server-name
+- hosts: all
+
   vars:
     sphinx_instances:
       - name: docs
@@ -27,6 +28,7 @@ sphinx and git has to be installed.
           - name: dir1
           - name: dir2
     sphinx_rollout_instance: docs
+
   roles:
     - alphanodes.tasks.sphinx_rollout
 ```

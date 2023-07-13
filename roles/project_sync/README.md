@@ -13,7 +13,8 @@ rsync for file sync. If you want database sync, you need database packages (mysq
 ## Example Playbook
 
 ```yaml
-- hosts: server-name
+- hosts: all
+
   vars:
     project_sync_instances:
       - name: prod-staging
@@ -24,6 +25,7 @@ rsync for file sync. If you want database sync, you need database packages (mysq
         db_source_name: store
         db_target_name: store
         db_target_owner: store
+
   roles:
     - alphanodes.tasks.project_sync
 ```

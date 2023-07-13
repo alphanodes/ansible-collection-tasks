@@ -29,7 +29,8 @@ Installed Drupal and drush
 ## Example Playbook
 
 ```yaml
-    - hosts: server-name
+    - hosts: all
+
       vars:
         drupal_task_name: rollout
         drupal_task_instance: drupal2
@@ -37,6 +38,7 @@ Installed Drupal and drush
           - name: drupal1
           - name: drupal2
           - name: drupal_another
+
       roles:
         - alphanodes.tasks.drupal-task
 ```

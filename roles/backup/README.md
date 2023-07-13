@@ -217,11 +217,13 @@ List of commands, which runs after backup dump has been created.
 ## Example Playbook
 
 ```yaml
-- hosts: server-name
+- hosts: all
+
   vars:
     backup_sets:
       - name: etc
         src: /etc
+
   roles:
     - alphanodes.tasks.backup
 ```
@@ -229,7 +231,8 @@ List of commands, which runs after backup dump has been created.
 ## Extendet example Playbook
 
 ```yaml
-- hosts: server-name
+- hosts: all
+
   vars:
     backup_max_days: 14
     backup_max_weeks: 4
@@ -246,6 +249,7 @@ List of commands, which runs after backup dump has been created.
         excludes:
           - builds
           - workspace
+
   roles:
     - alphanodes.tasks.backup
 ```

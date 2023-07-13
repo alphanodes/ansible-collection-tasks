@@ -13,12 +13,14 @@ ruby, bundle and git has to be installed.
 ## Example Playbook
 
 ```yaml
-- hosts: server-name
+- hosts: all
+
   vars:
     jekyll_instances:
       - name: prise-abenteuer-jekyll
         repo: git@github.com:myname/myrepo.git
         repo_version: main
+
   roles:
     - alphanodes.tasks.jekyll_rollout
 ```

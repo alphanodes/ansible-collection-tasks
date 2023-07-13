@@ -9,7 +9,8 @@ Installed LXC
 ## Example Playbook
 
 ```yaml
-    - hosts: server-name
+    - hosts: all
+
       vars:
         lxc_backup_sets:
           - name: instance1

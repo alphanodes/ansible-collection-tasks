@@ -13,9 +13,11 @@ Installed nextcloud.
 ## Example Playbook for cron run
 
 ```yaml
-- hosts: server-name
+- hosts: all
+
   vars:
     nextcloud_task_name: cron
+
   roles:
     - alphanodes.tasks.nextcloud_task
 ```
@@ -23,7 +25,8 @@ Installed nextcloud.
 ## Example Playbook for console run
 
 ```yaml
-- hosts: server-name
+- hosts: all
+
   vars:
     nextcloud_task_name: console
     nextcloud_console_command: maintenance:mimetype:update-db

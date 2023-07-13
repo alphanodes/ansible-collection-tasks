@@ -16,9 +16,11 @@ An installed redmine.
 ## Example Playbook
 
 ```yaml
-    - hosts: server-name
+    - hosts: all
+
       vars:
         redmine_task_name: reminder
+
       roles:
         - alphanodes.tasks.redmine_task
 ```

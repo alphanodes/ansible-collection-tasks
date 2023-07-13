@@ -9,7 +9,8 @@ Available variables are listed below, along with default values (see `defaults/m
 ## Example Playbook
 
 ```yaml
-- hosts: server-name
+- hosts: all
+
   vars:
     git_mirrors:
       # run git mirror (bare repo clone)
@@ -19,6 +20,7 @@ Available variables are listed below, along with default values (see `defaults/m
       - name: zabbix
         repo: https://git.zabbix.com/scm/zbx/zabbix.git
         push_to: git@github.com/yourname/your-repo.git
+
   roles:
     - alphanodes.tasks.git_mirror
 ```

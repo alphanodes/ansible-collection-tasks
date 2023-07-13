@@ -14,10 +14,12 @@ An installed redmine.
 ## Example Playbook
 
 ```yaml
-    - hosts: server-name
+    - hosts: all
+
       vars:
         matomo_domain: https://my.url-to-matomo.com
         matomo_console_name: core:archive
+
       roles:
         - alphanodes.tasks.matomo_task
 ```

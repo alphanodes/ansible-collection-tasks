@@ -52,10 +52,12 @@ Name of supervisor job, which should be restarted.
 ## Example Playbook for restart service
 
 ```yaml
-- hosts: server-name
+- hosts: all
+
   vars:
     system_task_name: service_restart
     system_task_service_name: php7.2-fpm
+
   roles:
     - alphanodes.tasks.system_task
 ```
@@ -63,9 +65,11 @@ Name of supervisor job, which should be restarted.
 ## Example Playbook for reboot
 
 ```yaml
-- hosts: server-name
+- hosts: all
+
   vars:
     system_task_name: reboot
+
   roles:
     - alphanodes.tasks.system_task
 ```
