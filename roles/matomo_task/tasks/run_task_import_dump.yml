@@ -3,7 +3,7 @@
 - name: Check if matomo_db_dump is specified
   ansible.builtin.fail:
     msg: 'matomo_db_dump is required.'
-  when: matomo_db_dump is undefined or matomo_db_dump == ''
+  when: matomo_db_dump is undefined or (matomo_db_dump | length == 0)
 
 - name: Get if of db dump
   ansible.builtin.stat:
@@ -43,7 +43,9 @@
     chdir: "{{ matomo_dir }}"
   become: "{{ true if matomo_user is defined else false }}"
   become_user: '{{ matomo_user | default(omit) }}'
-  when: (mysql_replication_role is undefined or mysql_replication_role == 'master') and (sync_master is undefined)
+  when:
+    - mysql_replication_role is undefined or mysql_replication_role == 'master'
+    - sync_master is undefined
 
 - name: Run matomo console database:optimize-archive-tables
   ansible.builtin.shell: "php console --no-ansi -n database:optimize-archive-tables all"
@@ -52,4 +54,6 @@
     chdir: "{{ matomo_dir }}"
   become: "{{ true if matomo_user is defined else false }}"
   become_user: '{{ matomo_user | default(omit) }}'
-  when: (mysql_replication_role is undefined or mysql_replication_role == 'master') and (sync_master is undefined)
+  when:
+    - mysql_replication_role is undefined or mysql_replication_role == 'master'
+    - sync_master is undefined

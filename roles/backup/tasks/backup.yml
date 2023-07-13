@@ -58,12 +58,16 @@
 - name: Include rsync tasks
   ansible.builtin.include_tasks: rsync.yml
   tags: sync
-  when: backup_remote_host != '' and backup_remote_transfer == 'rsync'
+  when:
+    - backup_remote_host | length > 0
+    - backup_remote_transfer == 'rsync'
 
 - name: Include lftp tasks
   ansible.builtin.include_tasks: lftp.yml
   tags: sync
-  when: backup_remote_host != '' and backup_remote_transfer == 'lftp'
+  when:
+    - backup_remote_host | length > 0
+    - backup_remote_transfer == 'lftp'
 
 - name: Include borg tasks
   ansible.builtin.include_tasks: borg.yml

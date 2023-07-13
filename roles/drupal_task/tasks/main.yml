@@ -2,7 +2,7 @@
 - name: Fail if drupal_task_name is not specified
   ansible.builtin.fail:
     msg: 'drupal_task_name variable has to be set with --extra-vars "drupal_task_name=rollout"'
-  when: drupal_task_name == ''
+  when: drupal_task_name | length == 0
 
 - name: Include instance tasks
   ansible.builtin.include_tasks: instance.yml
@@ -11,6 +11,6 @@
     loop_var: instance
   when: >
     (instance.run_drush is undefined or instance.run_drush)
-    and (drupal_task_instance == '' or instance.name == drupal_task_instance)
+    and ((drupal_task_instance | length == 0) or instance.name == drupal_task_instance)
   tags:
     - drupal

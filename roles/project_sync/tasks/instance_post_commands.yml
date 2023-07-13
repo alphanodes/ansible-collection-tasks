@@ -4,7 +4,7 @@
 - name: Run post drush commands - {{ instance.name }}
   ansible.builtin.command: "{{ instance.drush_path | default(drush_path) }} {{ instance.drush_profile | default('') }} {{ item }}"
   loop: '{{ instance.post_drush_commands | default([]) }}'
-  when: drush_path != ''
+  when: drush_path | length > 0
 
 - name: Run post commands - {{ instance.name }}
   become: "{{ item.become | default(false) }}"

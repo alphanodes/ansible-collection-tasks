@@ -14,22 +14,22 @@
 - name: Check missing host - {{ account.name }}
   ansible.builtin.fail:
     msg: 'host is missing for {{ account.name }}'
-  when: mails_host == ''
+  when: mails_host | length == 0
 
 - name: Check missing user - {{ account.name }}
   ansible.builtin.fail:
     msg: 'user is missing for {{ account.name }}'
-  when: mails_user == ''
+  when: mails_user | length == 0
 
 - name: Check missing password - {{ account.name }}
   ansible.builtin.fail:
     msg: 'password is missing for {{ account.name }}'
-  when: mails_password == ''
+  when: mails_password | length == 0
 
 - name: Check mssing protocol - {{ account.name }}
   ansible.builtin.fail:
     msg: 'unknown protocol for {{ account.name }}'
-  when: mails_protocol == '' or (mails_protocol != 'imap' and mails_protocol != 'pop3')
+  when: (mails_protocol | length == 0) or (mails_protocol != 'imap' and mails_protocol != 'pop3')
 
 - name: Receive mails for account {{ account.name }}
   ansible.builtin.command: bash -lc "bundle exec rake redmine:email:receive_{{ mails_protocol }} host={{ mails_host }} username='{{ mails_user }}' password='{{ mails_password }}' port={{ mails_port }} {{ 'ssl=true' if mails_ssl else '' }} allow_override='{{ mails_allow_override }}'{{ '' if mails_options == '' else ' ' + mails_options }}"

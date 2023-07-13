@@ -6,6 +6,6 @@
   loop_control:
     loop_var: instance
   when: >
-    (jekyll_rollout_instance == '' or instance.name == jekyll_rollout_instance) and
+    ((jekyll_rollout_instance | length == 0) or instance.name == jekyll_rollout_instance) and
     (instance.state is undefined or instance.state == 'active')
   tags: jekyll

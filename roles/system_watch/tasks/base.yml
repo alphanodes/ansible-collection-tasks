@@ -7,7 +7,7 @@
 - name: Check system_watch_repo
   ansible.builtin.fail:
     msg: 'system_watch_repo has to be set. You can also use --extra-vars "system_watch_repo=your-git-repo"'
-  when: system_watch_repo == ''
+  when: system_watch_repo | length == 0
 
 - name: Git pull system-watch for latest changes (pull 1)
   ansible.builtin.git:

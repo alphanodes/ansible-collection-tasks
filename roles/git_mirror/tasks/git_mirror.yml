@@ -17,9 +17,13 @@
   ansible.builtin.command: 'git push --mirror {{ repo_spec.push_to }}'
   args:
     chdir: '{{ repo_dir }}'
-  when: repo_spec.push_to is defined and git_rc.changed
+  when:
+    - repo_spec.push_to is defined
+    - git_rc.changed
 
 - name: Call URL if repo changed
   ansible.builtin.uri:
     url: '{{ repo_spec.call_url }}'
-  when: repo_spec.call_url is defined and git_rc.changed
+  when:
+    - repo_spec.call_url is defined
+    - git_rc.changed

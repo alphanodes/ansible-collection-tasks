@@ -3,7 +3,7 @@
 - name: Check nextcloud_task_name
   ansible.builtin.fail:
     msg: 'nextcloud_task_name is required'
-  when: nextcloud_task_name == ''
+  when: nextcloud_task_name | length == 0
   tags:
     - nextcloud
 

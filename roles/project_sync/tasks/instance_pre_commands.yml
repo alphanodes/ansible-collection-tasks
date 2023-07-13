@@ -2,7 +2,7 @@
 - name: Run pre drush commands - {{ instance.name }}
   ansible.builtin.command: "{{ instance.drush_path | default(drush_path) }} {{ instance.drush_profile | default('') }} {{ item }}"
   loop: '{{ instance.pre_drush_commands | default([]) }}'
-  when: drush_path != ''
+  when: drush_path | length > 0
 
 - name: Run pre commands - {{ instance.name }}
   become: "{{ item.become | default(false) }}"

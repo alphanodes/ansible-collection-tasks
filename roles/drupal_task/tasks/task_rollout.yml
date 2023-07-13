@@ -88,7 +88,9 @@
 - name: Include rollout tasks for drupal8
   ansible.builtin.include_tasks: rollout_drupal8.yml
   tags: drupal8
-  when: instance.major_version is defined and instance.major_version == 8
+  when:
+    - instance.major_version is defined
+    - instance.major_version == 8
 
 - name: Run cron
   when: >

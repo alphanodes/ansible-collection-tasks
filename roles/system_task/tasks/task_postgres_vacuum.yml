@@ -19,4 +19,6 @@
 - name: Output of postgres_vacuumdb
   ansible.builtin.debug:
     var: postgres_vacuumdb.stdout_lines
-  when: not system_task_postgres_quiet and postgres_vacuumdb.changed
+  when:
+    - not system_task_postgres_quiet
+    - postgres_vacuumdb.changed

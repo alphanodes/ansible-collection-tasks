@@ -7,9 +7,13 @@
 - name: Script output
   ansible.builtin.debug:
     var: pgbadger_result.stdout_lines
-  when: pgbadger_result is defined and pgbadger_result.stdout_lines | length
+  when:
+    - pgbadger_result is defined
+    - pgbadger_result.stdout_lines | length
 
 - name: Script errors
   ansible.builtin.debug:
     var: pgbadger_result.stderr_lines
-  when: pgbadger_result is defined and pgbadger_result.stderr_lines | length
+  when:
+    - pgbadger_result is defined
+    - pgbadger_result.stderr_lines | length

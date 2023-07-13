@@ -6,7 +6,9 @@
 - name: Check if hostname is defined
   ansible.builtin.fail:
     msg: 'if no host name is defined, db_source_name and db_target_name has to be different.'
-  when: source_host == '' and instance.db_source_name == instance.db_target_name
+  when:
+    - source_host | length == 0
+    - instance.db_source_name == instance.db_target_name
 
 # see https://docs.ansible.com/ansible/latest/collections/community/postgresql/postgresql_db_module.html
 - name: Create postgresql database local dump - {{ instance.name }}
@@ -17,24 +19,24 @@
     state: dump
   become_user: postgres
   become: true
-  when: source_host == ''
+  when: source_host | length == 0
 
 - name: Create postgresql database dump on remote host - {{ instance.name }}
   ansible.builtin.shell: >
     ssh {{ ssh_source_options + ' ' if ssh_source_options != '' else '' }}{{ source_host }}
     'su -l postgres -c "pg_dump {{ project_sync_postgresql_dump_options }}
     {{ instance.db_source_name }} > {{ tmp_postgres_dump_file }}"'
-  when: source_host != ''
+  when: source_host | length > 0
 
 - name: Transfer database dump to host - {{ instance.name }}
   ansible.builtin.command: >
     scp {{ scp_source_options + ' ' if scp_source_options != '' else '' }}{{ source_host }}:{{ tmp_postgres_dump_file }}
     {{ tmp_postgres_dump_file }}
-  when: source_host != ''
+  when: source_host | length > 0
 
 - name: Cleanup remote tmp file - {{ instance.name }}
   ansible.builtin.command: ssh {{ ssh_source_options + ' ' if ssh_source_options != '' else '' }}{{ source_host }} rm {{ tmp_postgres_dump_file }}
-  when: source_host != ''
+  when: source_host | length > 0
 
 - name: Drop database - {{ instance.name }}
   become_user: postgres
@@ -47,7 +49,9 @@
 - name: Check if instance.db_target_owner is defined for project_sync_recreate_db
   ansible.builtin.fail:
     msg: 'instance.db_target_owner is not defined, but required'
-  when: project_sync_recreate_db and instance.db_target_owner is undefined
+  when:
+    - project_sync_recreate_db
+    - instance.db_target_owner is undefined
 
 - name: Create database - {{ instance.name }}
   become_user: postgres

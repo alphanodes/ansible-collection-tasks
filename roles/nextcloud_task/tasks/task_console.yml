@@ -3,7 +3,7 @@
 - name: Check nextcloud_console_command
   ansible.builtin.fail:
     msg: 'nextcloud_console_command is required for console task'
-  when: nextcloud_console_command == ''
+  when: nextcloud_console_command | length == 0
 
 - name: Run nextcloud console occ {{ nextcloud_console_command }}
   ansible.builtin.command: 'php ./occ {{ nextcloud_console_command }}'
@@ -16,4 +16,6 @@
 - name: Output of console
   ansible.builtin.debug:
     var: console_result.stdout_lines
-  when: console_result.stdout_lines is defined and console_result.stdout_lines | length
+  when:
+    - console_result.stdout_lines is defined
+    - console_result.stdout_lines | length

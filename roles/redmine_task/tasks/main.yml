@@ -3,7 +3,7 @@
 - name: Check redmine_task_name
   ansible.builtin.fail:
     msg: 'redmine_task_name is required'
-  when: redmine_task_name == ''
+  when: redmine_task_name | length == 0
   tags:
     - redmine
 

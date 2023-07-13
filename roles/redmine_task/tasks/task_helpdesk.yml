@@ -19,7 +19,7 @@
 - name: Check helpdesk_mailer_url - {{ instance_name }}
   ansible.builtin.fail:
     msg: 'helpdesk_mailer_url is missing'
-  when: helpdesk_mailer_url == ''
+  when: helpdesk_mailer_url | length == 0
 
 - name: Set helpdesk_mailer_key - {{ instance_name }}
   ansible.builtin.set_fact:
@@ -28,7 +28,7 @@
 - name: Check helpdesk_mailer_key - {{ instance_name }}
   ansible.builtin.fail:
     msg: 'helpdesk_mailer_key is missing'
-  when: helpdesk_mailer_key == ''
+  when: helpdesk_mailer_key | length == 0
 
 - name: Set helpdesk url for redmineup plugin - {{ instance_name }}
   ansible.builtin.set_fact:
@@ -49,7 +49,9 @@
     return_content: true
     body_format: json
     validate_certs: false
-  changed_when: (json_response.content|from_json)['count'] is defined and (json_response.content|from_json)['count'] > 0
+  changed_when:
+    - (json_response.content|from_json)['count'] is defined
+    - (json_response.content|from_json)['count'] > 0
   register: json_response
 
 - name: Output of json_response - {{ instance_name }}

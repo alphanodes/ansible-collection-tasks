@@ -9,4 +9,6 @@
   loop: "{{ receive_mails | default([]) }}"
   loop_control:
     loop_var: account
-  when: account.name is defined and account.name != ''
+  when:
+    - account.name is defined
+    - account.name | length > 0

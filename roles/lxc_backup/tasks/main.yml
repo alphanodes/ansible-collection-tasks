@@ -22,4 +22,4 @@
   loop_control:
     loop_var: instance
   when: >
-    lxc_backup_set_name == '' or lxc_backup_set_name == instance.name
+    (lxc_backup_set_name | length == 0) or lxc_backup_set_name == instance.name

@@ -3,7 +3,7 @@
 - name: Check if system_task_service_name is defined
   ansible.builtin.fail:
     msg: 'system_task_service_name variable has to be set with --extra-vars "system_task_service_name=php7.2-fpm"'
-  when: system_task_service_name == ''
+  when: system_task_service_name | length == 0
 
 - name: Restart system service - {{ system_task_service_name }}
   ansible.builtin.systemd:

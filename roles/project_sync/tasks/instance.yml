@@ -18,19 +18,25 @@
   tags:
     - mysql
     - db
-  when: instance.db_type is defined and instance.db_type == 'mysql'
+  when:
+    - instance.db_type is defined
+    - instance.db_type == 'mysql'
 
 - name: "PostgreSQL include for {{ instance.name }}"
   ansible.builtin.include_tasks: instance_postgresql.yml
   tags:
     - postgresql
     - db
-  when: instance.db_type is defined and instance.db_type == 'postgresql'
+  when:
+    - instance.db_type is defined
+    - instance.db_type == 'postgresql'
 
 - name: "Files include for {{ instance.name }}"
   ansible.builtin.include_tasks: instance_files.yml
   tags: files
-  when: instance.src_dir is defined and instance.src_dir != ''
+  when:
+    - instance.src_dir is defined
+    - instance.src_dir | length > 0
 
 - name: "Post command include for {{ instance.name }}"
   ansible.builtin.include_tasks: instance_post_commands.yml

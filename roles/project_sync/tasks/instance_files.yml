@@ -13,7 +13,9 @@
   become_user: '{{ instance.rsync_become_user | default(omit) }}'
   register: sync_result
   changed_when: sync_result.stdout_lines | length != 4
-  when: instance.src_host is defined and instance.src_host != ''
+  when:
+    - instance.src_host is defined
+    - instance.src_host | length > 0
 
 - name: Sync files - {{ instance.name }}
   ansible.builtin.command: >
@@ -24,7 +26,7 @@
   become_user: '{{ instance.rsync_become_user | default(omit) }}'
   register: sync_result
   changed_when: sync_result.stdout_lines | length != 4
-  when: instance.src_host is not defined or instance.src_host == ''
+  when: instance.src_host is not defined or (instance.src_host | length == 0)
 
 - name: Set permissions to directories - {{ instance.name }}
   ansible.builtin.file:

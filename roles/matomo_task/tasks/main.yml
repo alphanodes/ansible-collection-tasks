@@ -3,17 +3,21 @@
 - name: Check if console or task is specified
   ansible.builtin.fail:
     msg: 'matomo_console_name or matomo_task_name has to be specified.'
-  when: matomo_console_name == '' and matomo_task_name == ''
+  when:
+    - matomo_console_name | length == 0
+    - matomo_task_name | length == 0
 
 - name: Check if console and task are set
   ansible.builtin.fail:
     msg: 'matomo_console_name and matomo_task_name cannot used together.'
-  when: matomo_console_name != '' and matomo_task_name != ''
+  when:
+    - matomo_console_name | length > 0
+    - matomo_task_name | length > 0
 
 - name: Include console tasks
   ansible.builtin.import_tasks: run_console.yml
   tags: matomo
-  when: matomo_console_name != ''
+  when: matomo_console_name | length > 0
 
 - name: Include tasks for {{ matomo_task_name }}
   ansible.builtin.include_tasks: run_task_{{ matomo_task_name | replace('-', '_') }}.yml

@@ -9,4 +9,6 @@
 - name: Output of task
   ansible.builtin.debug:
     var: task_result.stdout_lines
-  when: task_result.stdout_lines is defined and task_result.stdout_lines | length
+  when:
+    - task_result.stdout_lines is defined
+    - task_result.stdout_lines | length

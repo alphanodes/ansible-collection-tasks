@@ -3,7 +3,7 @@
 - name: Fail if dir is missing
   ansible.builtin.fail:
     msg: 'dir is missing for {{ instance.name }}'
-  when: instance.dir is undefined or instance.dir == ''
+  when: instance.dir is undefined or (instance.dir | length == 0)
 
 - name: Run git clone/pull - {{ instance.name }}
   ansible.builtin.git:

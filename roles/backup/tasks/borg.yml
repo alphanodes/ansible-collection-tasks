@@ -10,12 +10,12 @@
     borg_binary: "{{ backup_borg_binary if backup_borg_install_from_binary else '/usr/bin/borg' }}"
 
 - name: Run REPO1 tasks
-  when: backup_borg_repo != ''
+  when: backup_borg_repo | length > 0
   block:
     - name: Check passphrase for REPO1
       ansible.builtin.fail:
         msg: 'backup_borg_repo requires to set backup_borg_passphrase, too'
-      when: backup_borg_passphrase == ''
+      when: backup_borg_passphrase | length == 0
 
     - name: Set facts borg_repo for REPO1
       ansible.builtin.set_fact:
@@ -27,12 +27,12 @@
       ansible.builtin.include_tasks: borg_repo.yml
 
 - name: Run REPO2 tasks
-  when: backup_borg_repo2 != ''
+  when: backup_borg_repo2 | length > 0
   block:
     - name: Check passphrase for REPO2
       ansible.builtin.fail:
         msg: 'backup_borg_repo2 requires to set backup_borg_passphrase2, too'
-      when: backup_borg_passphrase2 == ''
+      when: backup_borg_passphrase2 | length == 0
 
     - name: Set facts borg_repo for REPO2
       ansible.builtin.set_fact:
