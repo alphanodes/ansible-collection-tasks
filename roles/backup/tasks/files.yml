@@ -3,7 +3,16 @@
   ansible.builtin.set_fact:
     excludes: "{{ instance.excludes | default([]) }}"
     unsafe_writes: "{{ instance.unsafe_writes | default(backup_files_unsafe_writes) }}"
+
+- name: Set fact backup_file_name with rotation
+  ansible.builtin.set_fact:
     backup_file_name: "{{ instance.name }}-{{ date_stamp }}-{{ backup_file_period }}.tar.gz"
+  when: instance.rotation is undefined or instance.rotation | bool == true
+
+- name: Set fact backup_file_name without rotation
+  ansible.builtin.set_fact:
+    backup_file_name: "{{ instance.name }}-{{ date_stamp }}-{{ backup_file_period }}.tar.gz"
+  when: instance.rotation is defined and instance.rotation | bool == false
 
 # see https://docs.ansible.com/ansible/latest/collections/community/general/archive_module.html
 # TODO: archive only creates files with absolute path

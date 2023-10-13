@@ -183,6 +183,7 @@ backup_sets: []
 ```
 
 Backup sets for file backup. `name` is used as backup file name. `src` is the directory of file, which should be back uped. `unsafe_writes` overwrites `backup_files_unsafe_writes`. `excludes` is a list, which can be used to exclude files or directories.
+If you use `rotation` and set it to false, backup file is created without date and period part (fixed name). This is usefull, if you have large files and you have no space for rotating backup files.
 
 ```yaml
 backup_one_per_day_limit: true
