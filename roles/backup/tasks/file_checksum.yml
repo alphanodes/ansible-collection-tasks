@@ -1,9 +1,9 @@
 ---
 
 # see https://docs.ansible.com/ansible/latest/collections/ansible/builtin/stat_module.html
-- name: Get stats of a file for checksum - {{ orig_file }}
+- name: Get stats of a file for checksum - {{ file_path }}
   ansible.builtin.stat:
-    path: '{{ orig_file }}'
+    path: '{{ file_path }}'
     get_checksum: true
     checksum_algorithm: sha256
   register: file_stat
@@ -11,7 +11,7 @@
 - name: Create hash file of backup sets
   ansible.builtin.template:
     src: checksum_file.j2
-    dest: '{{ orig_file }}.sha256'
-    owner: "{{ owner | default('root') }}"
-    group: "{{ owner | default('root') }}"
+    dest: '{{ file_path }}.sha256'
+    owner: "{{ file_owner | default('root') }}"
+    group: "{{ file_owner | default('root') }}"
     mode: 0644

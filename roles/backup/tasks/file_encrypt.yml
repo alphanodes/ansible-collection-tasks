@@ -1,0 +1,42 @@
+---
+# @see https://www.gnupg.org/documentation/manuals/gnupg/Operational-GPG-Commands.html
+
+# encrypt:
+# cat /secret/location/passwdfile | gpg -c --passphrase-fd 0 backup-file-to-encrypt.gz
+#
+# decrypt:
+# cat /secret/location/passwdfile | gpg --passphrase-fd 0 backup-file-to-encrypt.gz.gpg
+#
+# @see https://unix.stackexchange.com/questions/330305/encrypt-with-gpg-using-a-key-passed-as-cli-argument
+- name: Check if password is provided for encryption
+  ansible.builtin.fail:
+    msg: backup_file_encrypt_password is not defined. Use --extra-vars "backup_file_encrypt_password=yourpassword"
+  when: backup_file_encrypt_password is undefined or backup_file_encrypt_password == ''
+
+# encrypt:
+# gpg --symmetric file
+# encrypt with batch:
+# gpg --batch --symmetric --passphrase=yourpassword file
+# decrypt:
+# gpg --decrypt file.gpg > file
+# decrypt with batch:
+# gpg --batch --decrypt --passphrase=yourpassword file.gpg > file
+- name: Create encrypted file - {{ file_path }}
+  ansible.builtin.command: '{{ backup_file_encrypt_command }} {{ file_path }}'
+  args:
+    chdir: '{{ backup_dir }}'
+
+# Set permission
+- name: Check if ansible playbooks directory exist
+  ansible.builtin.file:
+    path: '{{ file_path }}.gpg'
+    mode: '{{ file_mode | default(omit) }}'
+    owner: "{{ file_owner | default(omit) }}"
+    group: "{{ file_group | default(omit) }}"
+    state: file
+  when: file_mode is defined or file_owner is defined or file_group is defined
+
+- name: Remove unencrypted file
+  ansible.builtin.file:
+    path: '{{ file_path }}'
+    state: absent

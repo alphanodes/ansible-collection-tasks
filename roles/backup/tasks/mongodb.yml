@@ -7,9 +7,16 @@
 - name: Create mongodb dump
   ansible.builtin.shell: "mongodump {{ backup_mongodb_options }} > {{ backup_dir }}/{{ backup_file_name }}"
 
-- name: Include checksum file
-  ansible.builtin.include_tasks: checksum_file.yml
+- name: Include encrypt file
+  ansible.builtin.include_tasks: file_checksum.yml
   vars:
-    orig_file: '{{ backup_dir }}/{{ backup_file_name }}'
-    owner: root
+    file_path: '{{ backup_dir }}/{{ backup_file_name }}'
+    file_owner: root
+  when: backup_file_encrypted
+
+- name: Include checksum file
+  ansible.builtin.include_tasks: file_checksum.yml
+  vars:
+    file_path: "{{ backup_dir }}/{{ backup_file_name + '.gpg' if backup_file_encrypted else backup_file_name }}"
+    file_owner: root
   when: backup_create_hashfiles

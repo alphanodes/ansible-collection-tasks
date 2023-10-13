@@ -14,9 +14,16 @@
   become: "{{ backup_mysql_become | default(omit) }}"
   become_user: '{{ backup_mysql_become_user | default(omit) }}'
 
-- name: Include checksum file
-  ansible.builtin.include_tasks: checksum_file.yml
+- name: Include encrypt file
+  ansible.builtin.include_tasks: file_encrypt.yml
   vars:
-    orig_file: '{{ backup_dir }}/{{ backup_file_name }}'
-    owner: "{{ backup_mysql_become_user | default('root') }}"
+    file_path: '{{ backup_dir }}/{{ backup_file_name }}'
+    file_owner: "{{ backup_mysql_become_user | default('root') }}"
+  when: backup_file_encrypted
+
+- name: Include checksum file
+  ansible.builtin.include_tasks: file_checksum.yml
+  vars:
+    file_path: "{{ backup_dir }}/{{ backup_file_name + '.gpg' if backup_file_encrypted else backup_file_name }}"
+    file_owner: "{{ backup_mysql_become_user | default('root') }}"
   when: backup_create_hashfiles

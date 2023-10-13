@@ -1,7 +1,8 @@
 ---
-- name: Set backup file name - {{ db.database }}
+- name: Set facts for backup file - {{ db.database }}
   ansible.builtin.set_fact:
     backup_file_name: "db-{{ db.database }}-{{ date_stamp }}-{{ backup_file_period }}.pg_dump"
+    backup_file_owner: postgres
 
 - name: Create postgresql dump - {{ db.database }}
   community.postgresql.postgresql_db:
@@ -9,12 +10,19 @@
     target: '{{ backup_dir }}/{{ backup_file_name }}'
     dump_extra_args: '{{ backup_postgresqldump_options }}'
     state: dump
-  become_user: postgres
+  become_user: '{{ backup_file_owner }}'
   become: true
 
-- name: Include checksum file
-  ansible.builtin.include_tasks: checksum_file.yml
+- name: Include encrypt file
+  ansible.builtin.include_tasks: file_encrypt.yml
   vars:
-    orig_file: '{{ backup_dir }}/{{ backup_file_name }}'
-    owner: postgres
+    file_path: '{{ backup_dir }}/{{ backup_file_name }}'
+    file_owner: '{{ backup_file_owner }}'
+  when: backup_file_encrypted
+
+- name: Include checksum file
+  ansible.builtin.include_tasks: file_checksum.yml
+  vars:
+    file_path: "{{ backup_dir }}/{{ backup_file_name + '.gpg' if backup_file_encrypted else backup_file_name }}"
+    file_owner: '{{ backup_file_owner }}'
   when: backup_create_hashfiles
