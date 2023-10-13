@@ -8,7 +8,7 @@
   ansible.builtin.shell: "mongodump {{ backup_mongodb_options }} > {{ backup_dir }}/{{ backup_file_name }}"
 
 - name: Include encrypt file
-  ansible.builtin.include_tasks: file_checksum.yml
+  ansible.builtin.include_tasks: file_encrypt.yml
   vars:
     file_path: '{{ backup_dir }}/{{ backup_file_name }}'
     file_owner: root
