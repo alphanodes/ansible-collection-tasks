@@ -11,7 +11,7 @@
 - name: Check if password is provided for encryption
   ansible.builtin.fail:
     msg: backup_file_encrypt_password is not defined. Use --extra-vars "backup_file_encrypt_password=yourpassword"
-  when: backup_file_encrypt_password is undefined or backup_file_encrypt_password == ''
+  when: backup_file_encrypt_password is undefined or backup_file_encrypt_password | length == 0
 
 # encrypt:
 # gpg --symmetric file
