@@ -13,6 +13,14 @@
     msg: backup_file_encrypt_password is not defined. Use --extra-vars "backup_file_encrypt_password=yourpassword"
   when: backup_file_encrypt_password is undefined or backup_file_encrypt_password | length == 0
 
+- name: Make sure no existing encrypted file exists
+  ansible.builtin.file:
+    path: '{{ item }}'
+    state: absent
+  loop:
+    - '{{ file_path }}.gpg'
+    - '{{ file_path }}.gpg.sha256'
+
 # encrypt:
 # gpg --symmetric file
 # encrypt with batch:
