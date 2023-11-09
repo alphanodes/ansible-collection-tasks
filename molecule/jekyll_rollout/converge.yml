@@ -2,5 +2,9 @@
 - name: Converge
   hosts: all
 
+  vars:
+    # no test data at the moment
+    jekyll_instances: []
+
   roles:
     - role: alphanodes.tasks.jekyll_rollout
