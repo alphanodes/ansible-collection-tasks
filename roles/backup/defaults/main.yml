@@ -25,8 +25,8 @@ backup_remote_excludes:
 
 backup_rsync_options: '-avz --delete'
 
-# rsync, lftp or borg
-backup_remote_transfer: rsync
+# rsync or lftp
+backup_remote_transfer: ''
 
 # only used with lftp
 backup_remote_user: ''
