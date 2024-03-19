@@ -16,7 +16,7 @@
   become: "{{ backup_files_become | default(omit) }}"
   become_user: "{{ backup_files_become_user | default(omit) }}"
   loop: "{{ backup_tmp.files | default([]) }}"
-  when: backup_tmp.matched > 0
+  when: backup_remove_temp_files and backup_tmp.matched > 0
 
 - name: Find old daily files
   ansible.builtin.find:

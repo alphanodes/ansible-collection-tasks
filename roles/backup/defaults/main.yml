@@ -23,6 +23,9 @@ backup_remote_excludes:
   - '.nfs*'
   - '*.tar'
 
+# files with extension .tar will be removed
+backup_remove_temp_files: true
+
 backup_rsync_options: '-avz --delete'
 
 # rsync or lftp
