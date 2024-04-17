@@ -46,3 +46,5 @@ system_watch_git_status_repos: []
 system_watch_add_git_safe_directory: false
 
 rails_env: production
+
+system_watch_enabled: true
