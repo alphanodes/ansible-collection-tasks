@@ -21,7 +21,7 @@
     accept_hostkey: true
   register: git_result
   become: '{{ true if instance.drupal_user is defined else false }}'
-  become_user: '{{ instance.drupal_user | default('') }}'
+  become_user: '{{ instance.drupal_user | default("") }}'
 
 - name: Run composer
   when: >
@@ -35,7 +35,7 @@
       register: composer_result
       changed_when: composer_result.rc != 0
       become: '{{ true if instance.drupal_user is defined else false }}'
-      become_user: '{{ instance.drupal_user | default('') }}'
+      become_user: '{{ instance.drupal_user | default("") }}'
 
     - name: Output of composer - {{ instance.name }}
       ansible.builtin.debug:
@@ -58,7 +58,7 @@
       register: update_result
       changed_when: update_result.rc != 0
       become: '{{ true if instance.drupal_user is defined else false }}'
-      become_user: '{{ instance.drupal_user | default('') }}'
+      become_user: '{{ instance.drupal_user | default("") }}'
 
     - name: Output of updatedb - {{ instance.name }}
       ansible.builtin.debug:
@@ -81,7 +81,7 @@
       register: entity_result
       changed_when: entity_result.rc != 0
       become: '{{ true if instance.drupal_user is defined else false }}'
-      become_user: '{{ instance.drupal_user | default('') }}'
+      become_user: '{{ instance.drupal_user | default("") }}'
 
     - name: Output of entity-updates - {{ instance.name }}
       ansible.builtin.debug:
@@ -100,7 +100,7 @@
       register: cim_result
       changed_when: cim_result.rc != 0
       become: '{{ true if instance.drupal_user is defined else false }}'
-      become_user: '{{ instance.drupal_user | default('') }}'
+      become_user: '{{ instance.drupal_user | default("") }}'
 
     - name: Output of config import - {{ instance.name }}
       ansible.builtin.debug:
@@ -117,7 +117,7 @@
       ansible.builtin.command: '{{ instance.drush_path | default(drush_path) }} @{{ instance.name }} cache-rebuild'
       register: cache_result
       become: '{{ true if instance.drupal_user is defined else false }}'
-      become_user: '{{ instance.drupal_user | default('') }}'
+      become_user: '{{ instance.drupal_user | default("") }}'
 
     - name: Output of cache-rebuild - {{ instance.name }}
       ansible.builtin.debug:
@@ -135,7 +135,7 @@
       register: cron_result
       ignore_errors: true
       become: '{{ true if instance.drupal_user is defined else false }}'
-      become_user: '{{ instance.drupal_user | default('') }}'
+      become_user: '{{ instance.drupal_user | default("") }}'
 
     - name: Output of cron - {{ instance.name }}
       ansible.builtin.debug:
