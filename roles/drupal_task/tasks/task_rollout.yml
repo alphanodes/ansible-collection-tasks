@@ -81,7 +81,7 @@
   become_user: '{{ instance.drupal_user | default("") }}'
   block:
     - name: Run updatedb - {{ instance.name }}
-      ansible.builtin.command: '{{ instance.drush_path | default(drush_path) }} @{{ instance.name }} --yes updatedb'
+      ansible.builtin.command: '{{ instance.drush_path | default(drush_path) }} @{{ instance.name }} --yes updatedb -v'
       args:
         chdir: "{{ instance.dir }}"
       register: update_result
