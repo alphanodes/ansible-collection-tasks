@@ -47,18 +47,41 @@
         var: composer_result.stderr_lines
       when: composer_result.stderr_lines | length
 
+- name: Run drush status
+  when: >
+    drupal_rollout_with_drush_status
+    and (mysql_replication_role is undefined or mysql_replication_role == 'master')
+    and sync_master is undefined
+  become: '{{ true if instance.drupal_user is defined else false }}'
+  become_user: '{{ instance.drupal_user | default("") }}'
+  block:
+    - name: Run drush status - {{ instance.name }}
+      ansible.builtin.command: '{{ instance.drush_path | default(drush_path) }} @{{ instance.name }} status'
+      register: status_result
+      changed_when: status_result.rc != 0
+
+    - name: Output of drush status - {{ instance.name }}
+      ansible.builtin.debug:
+        var: status_result.stdout_lines
+      when: status_result.stdout_lines | length
+
+    - name: Output of drush status errors (stderr) - {{ instance.name }}
+      ansible.builtin.debug:
+        var: status_result.stderr_lines
+      when: status_result.stderr_lines | length
+
 - name: Run db update
   when: >
     rollout_with_updatedb
     and (mysql_replication_role is undefined or mysql_replication_role == 'master')
     and sync_master is undefined
+  become: '{{ true if instance.drupal_user is defined else false }}'
+  become_user: '{{ instance.drupal_user | default("") }}'
   block:
     - name: Run updatedb - {{ instance.name }}
       ansible.builtin.command: '{{ instance.drush_path | default(drush_path) }} @{{ instance.name }} --yes updatedb'
       register: update_result
       changed_when: update_result.rc != 0
-      become: '{{ true if instance.drupal_user is defined else false }}'
-      become_user: '{{ instance.drupal_user | default("") }}'
 
     - name: Output of updatedb - {{ instance.name }}
       ansible.builtin.debug:

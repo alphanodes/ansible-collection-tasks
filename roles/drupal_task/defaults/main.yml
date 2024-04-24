@@ -18,6 +18,7 @@ drupal_rollout_with_entity_updates: false
 drupal_rollout_with_cron: true
 drupal_rollout_with_cache_clear: true
 drupal_rollout_with_cim: false
+drupal_rollout_with_drush_status: true
 
 drupal_vhost_dir: '/htdocs'
 drush_path: /root/.composer/vendor/bin/drush
