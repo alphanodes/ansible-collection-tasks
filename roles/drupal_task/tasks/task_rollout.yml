@@ -57,6 +57,8 @@
   block:
     - name: Run drush status - {{ instance.name }}
       ansible.builtin.command: '{{ instance.drush_path | default(drush_path) }} @{{ instance.name }} status'
+      args:
+        chdir: "{{ instance.dir }}"
       register: status_result
       changed_when: status_result.rc != 0
 
@@ -80,6 +82,8 @@
   block:
     - name: Run updatedb - {{ instance.name }}
       ansible.builtin.command: '{{ instance.drush_path | default(drush_path) }} @{{ instance.name }} --yes updatedb'
+      args:
+        chdir: "{{ instance.dir }}"
       register: update_result
       changed_when: update_result.rc != 0
 
