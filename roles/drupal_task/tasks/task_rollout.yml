@@ -12,159 +12,155 @@
   ansible.builtin.set_fact:
     real_composer_bin: "{{ real_composer_path }}{{ '' if real_composer_path == '' else '/' }}composer"
 
-- name: Run git clone/pull - {{ instance.name }}
-  ansible.builtin.git:
-    repo: '{{ instance.repo }}'
-    dest: '{{ instance.dir }}'
-    version: '{{ instance.repo_version | default(omit) }}'
-    force: '{{ instance.force_update | default(omit) }}'
-    accept_hostkey: true
-  register: git_result
+- name: Run rollout tasks
   become: '{{ true if instance.drupal_user is defined else false }}'
   become_user: '{{ instance.drupal_user | default("") }}'
-
-- name: Run composer
   when: >
-    instance.rollout_with_composer is defined
-    and instance.rollout_with_composer
-  block:
-    - name: Run composer - {{ instance.name }}
-      ansible.builtin.command: '{{ real_composer_bin }} {{ instance.composer_params | default(drupal_composer_params) }}'
-      args:
-        chdir: "{{ instance.composer_json_path | default(instance.dir + drupal_vhost_dir) }}"
-      register: composer_result
-      changed_when: composer_result.rc != 0
-      become: '{{ true if instance.drupal_user is defined else false }}'
-      become_user: '{{ instance.drupal_user | default("") }}'
-
-    - name: Output of composer - {{ instance.name }}
-      ansible.builtin.debug:
-        var: composer_result.stdout_lines
-      when: composer_result.stdout_lines | length
-
-    - name: Output of composer errors (stderr) - {{ instance.name }}
-      ansible.builtin.debug:
-        var: composer_result.stderr_lines
-      when: composer_result.stderr_lines | length
-
-- name: Run drush status
-  when: >
-    drupal_rollout_with_drush_status
-    and (mysql_replication_role is undefined or mysql_replication_role == 'master')
-    and sync_master is undefined
-  become: '{{ true if instance.drupal_user is defined else false }}'
-  become_user: '{{ instance.drupal_user | default("") }}'
-  block:
-    - name: Run drush status - {{ instance.name }}
-      ansible.builtin.command: '{{ instance.drush_path | default(drush_path) }} @{{ instance.name }} status'
-      args:
-        chdir: "{{ instance.dir }}"
-      register: status_result
-      changed_when: status_result.rc != 0
-
-    - name: Output of drush status - {{ instance.name }}
-      ansible.builtin.debug:
-        var: status_result.stdout_lines
-      when: status_result.stdout_lines | length
-
-    - name: Output of drush status errors (stderr) - {{ instance.name }}
-      ansible.builtin.debug:
-        var: status_result.stderr_lines
-      when: status_result.stderr_lines | length
-
-- name: Run db update
-  when: >
-    rollout_with_updatedb
-    and (mysql_replication_role is undefined or mysql_replication_role == 'master')
-    and sync_master is undefined
-  become: '{{ true if instance.drupal_user is defined else false }}'
-  become_user: '{{ instance.drupal_user | default("") }}'
-  block:
-    - name: Run updatedb - {{ instance.name }}
-      ansible.builtin.command: '{{ instance.drush_path | default(drush_path) }} @{{ instance.name }} --yes updatedb -v'
-      args:
-        chdir: "{{ instance.dir }}"
-      register: update_result
-      changed_when: update_result.rc != 0
-
-    - name: Output of updatedb - {{ instance.name }}
-      ansible.builtin.debug:
-        var: update_result.stdout_lines
-      when: update_result.stdout_lines | length
-
-    - name: Output of updatedb errors (stderr) - {{ instance.name }}
-      ansible.builtin.debug:
-        var: update_result.stderr_lines
-      when: update_result.stderr_lines | length
-
-- name: Run entity-updates
-  when: >
-    rollout_with_entity_updates
-    and (mysql_replication_role is undefined or mysql_replication_role == 'master')
+    mysql_replication_role is undefined or mysql_replication_role == 'master')
     and sync_master is undefined
   block:
-    - name: Run entity-updates - {{ instance.name }}
-      ansible.builtin.command: '{{ instance.drush_path | default(drush_path) }} @{{ instance.name }} --yes entity-updates'
-      register: entity_result
-      changed_when: entity_result.rc != 0
-      become: '{{ true if instance.drupal_user is defined else false }}'
-      become_user: '{{ instance.drupal_user | default("") }}'
+    - name: Run git clone/pull - {{ instance.name }}
+      ansible.builtin.git:
+        repo: '{{ instance.repo }}'
+        dest: '{{ instance.dir }}'
+        version: '{{ instance.repo_version | default(omit) }}'
+        force: '{{ instance.force_update | default(omit) }}'
+        accept_hostkey: true
+      register: git_result
 
-    - name: Output of entity-updates - {{ instance.name }}
-      ansible.builtin.debug:
-        var: entity_result.stdout_lines
-      when: entity_result.stdout_lines | length
+    - name: Run composer
+      when: >
+        instance.rollout_with_composer is defined
+        and instance.rollout_with_composer
+      block:
+        - name: Run composer - {{ instance.name }}
+          ansible.builtin.command: '{{ real_composer_bin }} {{ instance.composer_params | default(drupal_composer_params) }}'
+          args:
+            chdir: "{{ instance.composer_json_path | default(instance.dir + drupal_vhost_dir) }}"
+          register: composer_result
+          changed_when: composer_result.rc != 0
 
-- name: Run config import
-  when: >
-    ( instance.with_cim is defined and instance.with_cim )
-    or drupal_rollout_with_cim
-  block:
-    - name: Run config import - {{ instance.name }}
-      ansible.builtin.command: '{{ instance.drush_path | default(drush_path) }} @{{ instance.name }} --yes cim'
-      args:
-        chdir: "{{ instance.dir }}{{ instance.vhost_dir | default(drupal_vhost_dir) }}"
-      register: cim_result
-      changed_when: cim_result.rc != 0
-      become: '{{ true if instance.drupal_user is defined else false }}'
-      become_user: '{{ instance.drupal_user | default("") }}'
+        - name: Output of composer - {{ instance.name }}
+          ansible.builtin.debug:
+            var: composer_result.stdout_lines
+          when: composer_result.stdout_lines | length
 
-    - name: Output of config import - {{ instance.name }}
-      ansible.builtin.debug:
-        var: cim_result.stdout_lines
-      when: cim_result.stdout_lines | length
+        - name: Output of composer errors (stderr) - {{ instance.name }}
+          ansible.builtin.debug:
+            var: composer_result.stderr_lines
+          when: composer_result.stderr_lines | length
 
-- name: Run cache-rebuild
-  when: >
-    rollout_with_cache_clear
-    and (mysql_replication_role is undefined or mysql_replication_role == 'master')
-    and sync_master is undefined
-  block:
-    - name: Run cache-rebuild - {{ instance.name }}
-      ansible.builtin.command: '{{ instance.drush_path | default(drush_path) }} @{{ instance.name }} cache-rebuild'
-      register: cache_result
-      become: '{{ true if instance.drupal_user is defined else false }}'
-      become_user: '{{ instance.drupal_user | default("") }}'
+    - name: Run drush status
+      when: drupal_rollout_with_drush_status
+      block:
+        - name: Run drush status - {{ instance.name }}
+          ansible.builtin.command: '{{ instance.drush_path | default(drush_path) }} @{{ instance.name }} status'
+          args:
+            chdir: "{{ instance.dir }}"
+          register: status_result
+          changed_when: status_result.rc != 0
 
-    - name: Output of cache-rebuild - {{ instance.name }}
-      ansible.builtin.debug:
-        var: cache_result.stdout_lines
-      when: cache_result.stdout_lines | length
+        - name: Output of drush status - {{ instance.name }}
+          ansible.builtin.debug:
+            var: status_result.stdout_lines
+          when: status_result.stdout_lines | length
 
-- name: Run cron
-  when: >
-    rollout_with_cron
-    and (mysql_replication_role is undefined or mysql_replication_role == 'master')
-    and sync_master is undefined
-  block:
-    - name: Run cron - {{ instance.name }}
-      ansible.builtin.command: '{{ instance.drush_path | default(drush_path) }} @{{ instance.name }} cron'
-      register: cron_result
-      ignore_errors: true
-      become: '{{ true if instance.drupal_user is defined else false }}'
-      become_user: '{{ instance.drupal_user | default("") }}'
+        - name: Output of drush status errors (stderr) - {{ instance.name }}
+          ansible.builtin.debug:
+            var: status_result.stderr_lines
+          when: status_result.stderr_lines | length
 
-    - name: Output of cron - {{ instance.name }}
-      ansible.builtin.debug:
-        var: cron_result.stdout_lines
-      when: cron_result.stdout_lines | length
+    - name: Run db update
+      when: rollout_with_updatedb
+      block:
+        - name: Run updatedb - {{ instance.name }}
+          ansible.builtin.command: '{{ instance.drush_path | default(drush_path) }} @{{ instance.name }} --yes updatedb -v'
+          args:
+            chdir: "{{ instance.dir }}"
+          register: update_result
+          changed_when: update_result.rc != 0
+
+        - name: Output of updatedb - {{ instance.name }}
+          ansible.builtin.debug:
+            var: update_result.stdout_lines
+          when: update_result.stdout_lines | length
+
+        - name: Output of updatedb errors (stderr) - {{ instance.name }}
+          ansible.builtin.debug:
+            var: update_result.stderr_lines
+          when: update_result.stderr_lines | length
+
+    - name: Run entity-updates
+      when: rollout_with_entity_updates
+      block:
+        - name: Run entity-updates - {{ instance.name }}
+          ansible.builtin.command: '{{ instance.drush_path | default(drush_path) }} @{{ instance.name }} --yes entity-updates'
+          register: entity_result
+          changed_when: entity_result.rc != 0
+
+        - name: Output of entity-updates - {{ instance.name }}
+          ansible.builtin.debug:
+            var: entity_result.stdout_lines
+          when: entity_result.stdout_lines | length
+
+        - name: Output of entity-updates (stderr) - {{ instance.name }}
+          ansible.builtin.debug:
+            var: entity_result.stderr_lines
+          when: entity_result.stderr_lines | length
+
+    - name: Run config import
+      when: >
+        (instance.with_cim is defined and instance.with_cim)
+        or drupal_rollout_with_cim
+      block:
+        - name: Run config import - {{ instance.name }}
+          ansible.builtin.command: '{{ instance.drush_path | default(drush_path) }} @{{ instance.name }} --yes cim'
+          args:
+            chdir: "{{ instance.dir }}{{ instance.vhost_dir | default(drupal_vhost_dir) }}"
+          register: cim_result
+          changed_when: cim_result.rc != 0
+
+        - name: Output of cim - {{ instance.name }}
+          ansible.builtin.debug:
+            var: cim_result.stdout_lines
+          when: cim_result.stdout_lines | length
+
+        - name: Output of cim (stderr) - {{ instance.name }}
+          ansible.builtin.debug:
+            var: cim_result.stderr_lines
+          when: cim_result.stderr_lines | length
+
+    - name: Run cache-rebuild
+      when: rollout_with_cache_clear
+      block:
+        - name: Run cache-rebuild - {{ instance.name }}
+          ansible.builtin.command: '{{ instance.drush_path | default(drush_path) }} @{{ instance.name }} cache-rebuild'
+          register: cache_result
+
+        - name: Output of cache-rebuild - {{ instance.name }}
+          ansible.builtin.debug:
+            var: cache_result.stdout_lines
+          when: cache_result.stdout_lines | length
+
+        - name: Output of cache-rebuild (stderr) - {{ instance.name }}
+          ansible.builtin.debug:
+            var: cache_result.stderr_lines
+          when: cache_result.stderr_lines | length
+
+    - name: Run cron
+      when: rollout_with_cron
+      block:
+        - name: Run cron - {{ instance.name }}
+          ansible.builtin.command: '{{ instance.drush_path | default(drush_path) }} @{{ instance.name }} cron'
+          register: cron_result
+          ignore_errors: true
+
+        - name: Output of cron - {{ instance.name }}
+          ansible.builtin.debug:
+            var: cron_result.stdout_lines
+          when: cron_result.stdout_lines | length
+
+        - name: Output of cron (stderr) - {{ instance.name }}
+          ansible.builtin.debug:
+            var: cron_result.stderr_lines
+          when: cron_result.stderr_lines | length
