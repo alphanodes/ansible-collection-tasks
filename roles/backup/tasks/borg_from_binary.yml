@@ -6,7 +6,7 @@
       ansible.builtin.get_url:
         url: '{{ backup_borg_binary_uri }}'
         dest: '{{ backup_borg_binary }}'
-        mode: 0755
+        mode: '0755'
         owner: root
         group: root
       when: not borg_binary_src_info.stat.exists

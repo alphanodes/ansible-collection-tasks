@@ -21,12 +21,12 @@
 - name: Restrict read permissions of log directory
   ansible.builtin.file:
     path: '{{ system_watch_dir }}'
-    mode: 0700
+    mode: '0700'
 
 - name: Make sure system-watch dir exists
   ansible.builtin.file:
     path: '{{ system_watch_log_dir }}'
-    mode: 0755
+    mode: '0755'
     state: directory
 
 - name: Sync etc directory for tracking

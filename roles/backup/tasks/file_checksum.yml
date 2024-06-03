@@ -14,4 +14,4 @@
     dest: '{{ file_path }}.sha256'
     owner: "{{ file_owner | default('root') }}"
     group: "{{ file_owner | default('root') }}"
-    mode: 0644
+    mode: '0644'

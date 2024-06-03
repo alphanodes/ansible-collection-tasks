@@ -17,7 +17,7 @@
   ansible.builtin.file:
     path: '{{ lxc_backup_mount_parent_dir }}/{{ instance.name }}'
     state: directory
-    mode: 0755
+    mode: '0755'
 
 - name: Mount lxc container - {{ instance.name }}
   ansible.posix.mount:
@@ -34,7 +34,7 @@
     path: '{{ lxc_backup_mount_parent_dir }}/{{ instance.name }}'
     dest: '{{ lxc_backup_dir }}/lxc-{{ instance.name }}-{{ date_stamp }}.tar.gz'
     format: gz
-    mode: 0644
+    mode: '0644'
     unsafe_writes: '{{ False if with_stop else True }}'
 
 - name: Unmount lxc container - {{ instance.name }}

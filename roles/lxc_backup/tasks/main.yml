@@ -9,7 +9,7 @@
   ansible.builtin.file:
     path: '{{ lxc_backup_dir }}'
     state: directory
-    mode: 0755
+    mode: '0755'
 
 - name: Include clear tasks
   ansible.builtin.include_tasks: clear.yml
