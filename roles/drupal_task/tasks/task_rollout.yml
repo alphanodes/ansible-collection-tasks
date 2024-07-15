@@ -16,7 +16,7 @@
   become: '{{ true if instance.drupal_user is defined else false }}'
   become_user: '{{ instance.drupal_user | default("") }}'
   when: >
-    mysql_replication_role is undefined or mysql_replication_role == 'master')
+    (mysql_replication_role is undefined or mysql_replication_role == 'master')
     and sync_master is undefined
   block:
     - name: Run git clone/pull - {{ instance.name }}
