@@ -7,10 +7,46 @@
     rollout_with_cache_clear: "{{ instance.rollout_with_cache_clear | default(drupal_rollout_with_cache_clear) }}"
     rollout_with_cim: "{{ instance.rollout_with_cim | default(drupal_rollout_with_cim) }}"
     real_composer_path: "{{ instance.composer_path | default('') }}"
+    real_vhost_dir: "{{ instance.dir }}{{ instance.vhost_dir | default(drupal_vhost_dir) }}"
 
 - name: Set real_composer_bin - {{ instance.name }}
   ansible.builtin.set_fact:
     real_composer_bin: "{{ real_composer_path }}{{ '' if real_composer_path == '' else '/' }}composer"
+
+- name: Fix permissions before checkout
+  block:
+    - name: Check for settings.prod.php
+      ansible.builtin.stat:
+        path: "{{ real_vhost_dir }}/sites/default/settings.php"
+      register: settings_php
+
+    - name: Check for settings.prod.php
+      ansible.builtin.stat:
+        path: "{{ real_vhost_dir }}/sites/default/settings.prod.php"
+      register: settings_prod_php
+
+    - name: Fix sites/default permission
+      ansible.builtin.file:
+        path: "{{ real_vhost_dir }}/sites/default"
+        owner: "{{ instance.drupal_user | default(omit) }}"
+        mode: '0755'
+        state: directory
+
+    - name: Fix settings.php owner and permission
+      ansible.builtin.file:
+        path: "{{ settings_php.stat.path }}"
+        owner: "{{ instance.drupal_user | default(omit) }}"
+        mode: '0644'
+        state: file
+      when: settings_php.stat.exists
+
+    - name: Fix settings.prod.php owner and permission
+      ansible.builtin.file:
+        path: "{{ settings_prod_php.stat.path }}"
+        owner: "{{ instance.drupal_user | default(omit) }}"
+        mode: '0644'
+        state: file
+      when: settings_prod_php.stat.exists
 
 - name: Run rollout tasks
   become: '{{ true if instance.drupal_user is defined else false }}'
@@ -116,7 +152,7 @@
         - name: Run config import - {{ instance.name }}
           ansible.builtin.command: '{{ instance.drush_path | default(drush_path) }} @{{ instance.name }} --yes cim'
           args:
-            chdir: "{{ instance.dir }}{{ instance.vhost_dir | default(drupal_vhost_dir) }}"
+            chdir: "{{ real_vhost_dir }}"
           register: cim_result
           changed_when: cim_result.rc != 0
 
