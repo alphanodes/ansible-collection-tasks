@@ -5,7 +5,10 @@
 system_watch_repo: ''
 system_watch_repo_version: main
 
-system_watch_dir: /srv/.log
+# root path
+srv_path: /srv
+
+system_watch_dir: '{{ srv_path }}/.log'
 system_watch_host: '{{ ansible_hostname }}'
 
 system_watch_rsync_opts:

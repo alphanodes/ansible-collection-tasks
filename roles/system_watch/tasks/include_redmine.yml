@@ -7,7 +7,7 @@
 
 - name: Set redmine_dir variable
   ansible.builtin.set_fact:
-    redmine_dir: '{{ instance.dir | default("/srv/" + instance_name + "/redmine") }}'
+    redmine_dir: '{{ instance.dir | default(srv_path + "/" + instance_name + "/redmine") }}'
 
 # git_config does not support multiple values
 # see https://docs.ansible.com/ansible/2.9/modules/git_config_module.html
