@@ -1,0 +1,22 @@
+---
+
+- name: Check if custom available_plugins_list is available
+  ansible.builtin.stat:
+    path: "{{ playbook_dir }}/files/redmine/available_plugins.yml"
+  ignore_errors: true
+  register: custom_available_plugins
+  delegate_to: localhost
+
+- name: Include custom plugins variables.
+  ansible.builtin.include_vars: '{{ custom_available_plugins.stat.path }}'
+  when: custom_available_plugins.stat.exists
+
+- name: Include instance tasks
+  ansible.builtin.include_tasks: instance.yml
+  tags: redmine
+  loop: "{{ redmine_instances | dict2items }}"
+  loop_control:
+    loop_var: r_instance
+  when:
+    - redmine_fast_rollout_instance is defined and redmine_fast_rollout_instance == r_instance.key or redmine_fast_rollout_instance is undefined
+    - r_instance.value.state is undefined or r_instance.value.state == 'active'

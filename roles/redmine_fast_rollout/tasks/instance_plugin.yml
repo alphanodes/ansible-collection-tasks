@@ -1,0 +1,24 @@
+---
+
+- name: with plugin definition
+  when: custom_available_plugins.stat.exists and 1==0
+  block:
+    - name: Set plugin - {{ instance_name }}
+      ansible.builtin.set_fact:
+        plugin: "{{ redmine_plugins_available[plugin_name] }}"
+
+    - name: Install plugin {{ plugin_name }}
+      ansible.builtin.git:
+        repo: '{{ plugin[preferred_git_url] | default(plugin["url"]) }}'
+        dest: '{{ redmine_dir }}/plugins/{{ plugin["target_dir"] | default(plugin_name) }}'
+        version: '{{ plugin["dev_version"] if instance.plugin_version is defined and instance.plugin_version == "dev" and plugin["dev_version"] is defined else plugin["version"] | default(omit) }}'
+        depth: '{{ 0 if redmine_full_remote_deploy else 1 }}'
+        force: true
+
+- name: without plugin definition
+  when: custom_available_plugins.stat.exists
+  block:
+    - name: Update existing plugin git source for {{ plugin_name }}
+      ansible.builtin.command: git pull --force
+      args:
+        chdir: '{{ redmine_dir }}/plugins/{{ plugin_name }}'

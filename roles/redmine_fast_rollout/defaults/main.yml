@@ -1,0 +1,16 @@
+---
+# defaults file for redmine_fast_rollout
+
+# root path of all redmine instances
+srv_path: /srv
+
+# all redmine instances
+redmine_instances: {}
+
+# if set, only this redmine instance of redmine_instances is used
+# redmine_fast_rollout_instance:
+
+rails_env: production
+
+# set to yes, if git history for ssh is required on deploy
+redmine_full_remote_deploy: false

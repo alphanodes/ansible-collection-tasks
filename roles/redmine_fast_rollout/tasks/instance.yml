@@ -1,0 +1,41 @@
+---
+
+- name: Set instance variables
+  ansible.builtin.set_fact:
+    instance: "{{ r_instance.value }}"
+    instance_name: "{{ r_instance.key }}"
+
+- name: Set facts
+  ansible.builtin.set_fact:
+    redmine_rails_env: "{{ instance.rails_env | default(rails_env) }}"
+    redmine_dir: "{{ instance.dir | default('/srv/' + instance_name + '/redmine') }}"
+
+- name: Plugin tasks include
+  ansible.builtin.include_tasks: instance_plugins.yml
+
+- name: Run update
+  become: true
+  become_user: '{{ instance_name }}'
+  environment:
+    RAILS_ENV: '{{ redmine_rails_env }}'
+  block:
+    # always run bundler update (even, if bundler install has to run before)
+    - name: Update gem packages for redmine - {{ instance_name }}
+      ansible.builtin.command: bash -lc "bundle update --jobs={{ ansible_processor_nproc }}"
+      args:
+        chdir: '{{ redmine_dir }}'
+      register: redmine_gem_result
+      changed_when: redmine_gem_result.rc != 0
+
+    - name: Update redmine plugin database - {{ instance_name }}
+      ansible.builtin.command: bash -lc "{{ instance.update_prefix | default('') }}bundle exec rake redmine:plugins:migrate"
+      args:
+        chdir: '{{ redmine_dir }}'
+      register: update_redmine_result
+      changed_when: "update_redmine_result.rc != 0"
+      when: mysql_replication_role is undefined or mysql_replication_role!='slave'
+
+- name: Start/Restart puma via systemd - {{ instance_name }}
+  ansible.builtin.systemd:
+    name: puma-{{ instance_name }}
+    state: restarted
