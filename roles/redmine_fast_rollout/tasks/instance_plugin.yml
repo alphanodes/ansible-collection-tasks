@@ -1,7 +1,7 @@
 ---
 
 - name: with plugin definition
-  when: custom_available_plugins.stat.exists and 1==0
+  when: custom_available_plugins.stat.exists
   block:
     - name: Set plugin - {{ instance_name }}
       ansible.builtin.set_fact:
@@ -16,7 +16,7 @@
         force: true
 
 - name: without plugin definition
-  when: custom_available_plugins.stat.exists
+  when: not custom_available_plugins.stat.exists
   block:
     - name: Update existing plugin git source for {{ plugin_name }}
       ansible.builtin.command: git pull --force
