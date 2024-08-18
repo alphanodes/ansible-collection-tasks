@@ -14,3 +14,5 @@ rails_env: production
 
 # set to yes, if git history for ssh is required on deploy
 redmine_full_remote_deploy: false
+
+redmine_plugin_access: readonly
