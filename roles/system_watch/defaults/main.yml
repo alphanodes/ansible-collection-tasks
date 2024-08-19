@@ -18,6 +18,7 @@ system_watch_rsync_opts:
   - "--exclude=*.dpkg-new"
   - "--exclude=*.dpkg-old"
   - "--exclude=/mtab"
+  - "--exclude=/.updated"
   - "--exclude=/ld.so.cache"
   - "--exclude=/hosts.deny.purge.bak"
 
