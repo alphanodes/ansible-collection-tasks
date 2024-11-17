@@ -26,5 +26,3 @@ jobs:
 
       - name: Lint Ansible Playbook
         uses: ansible/ansible-lint@main
-        with:
-          setup_python: "true"
