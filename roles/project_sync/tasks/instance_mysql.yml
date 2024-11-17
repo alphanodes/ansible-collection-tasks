@@ -34,12 +34,14 @@
 - name: Drop database - {{ instance.name }}
   community.mysql.mysql_db:
     name: '{{ instance.db_target_name }}'
+    login_host: '{{ instance.db_target_login_host | default(omit) }}'
     state: absent
   when: project_sync_recreate_db
 
 - name: Create database - {{ instance.name }}
   community.mysql.mysql_db:
     name: '{{ instance.db_target_name }}'
+    login_host: '{{ instance.db_target_login_host | default(omit) }}'
     state: present
   when: project_sync_recreate_db
 
