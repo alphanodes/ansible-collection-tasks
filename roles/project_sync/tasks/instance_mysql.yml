@@ -35,6 +35,7 @@
   community.mysql.mysql_db:
     name: '{{ instance.db_target_name }}'
     login_host: '{{ instance.db_target_login_host | default(omit) }}'
+    login_unix_socket: '{{ instance.db_target_login_unix_socket | default(omit) }}'
     state: absent
   when: project_sync_recreate_db
 
@@ -42,6 +43,7 @@
   community.mysql.mysql_db:
     name: '{{ instance.db_target_name }}'
     login_host: '{{ instance.db_target_login_host | default(omit) }}'
+    login_unix_socket: '{{ instance.db_target_login_unix_socket | default(omit) }}'
     state: present
   when: project_sync_recreate_db
 
