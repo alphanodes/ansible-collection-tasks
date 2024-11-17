@@ -1,6 +1,6 @@
 ---
 
-- name: with plugin definition
+- name: With plugin definition
   when: custom_available_plugins.stat.exists
   block:
     - name: Set plugin - {{ instance_name }}
@@ -15,7 +15,7 @@
         depth: '{{ 0 if redmine_full_remote_deploy else 1 }}'
         force: true
 
-- name: without plugin definition
+- name: Without plugin definition
   when: not custom_available_plugins.stat.exists
   block:
     - name: Update existing plugin git source for {{ plugin_name }}
