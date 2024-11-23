@@ -20,4 +20,4 @@
   when: >
     ((instance.post_commands is defined and instance.post_commands is iterable) or
     instance.post_uri is defined) and
-    repo_update is defined and repo_update.changed
+    (force_post_commands is defined and force_post_commands or repo_update is defined and repo_update.changed)
