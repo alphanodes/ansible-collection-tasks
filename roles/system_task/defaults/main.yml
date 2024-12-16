@@ -24,6 +24,7 @@ system_task_pgbadger_query_log: ''
 system_task_pgbadger_query_outdir: '{{ postgresql_pgbadger_output_dir }}'
 # system_task_pgbadger_query_options: -v -I -o index.html
 # see https://pgbadger.darold.net/documentation.html
+# issues: https://github.com/darold/pgbadger/issues
 system_task_pgbadger_query_options: -v -I -f syslog --exclude-appname pg_dump --exclude-appname bin/about --prefix 'user=%u,db=%d,app=%a,client=%h ' --journalctl 'journalctl -t postgres' -o index.html
 
 system_task_goaccess_index_file: index.html
