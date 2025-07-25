@@ -15,7 +15,7 @@
           FROM pg_stat_all_tables
           WHERE schemaname = 'public'
           ORDER BY relname;
-        db: '{{ database }}'
+        login_db: '{{ database }}'
         autocommit: true
       become: "{{ true if system_task_postgres_user != '' else false }}"
       become_user: '{{ system_task_postgres_user | default(omit) }}'

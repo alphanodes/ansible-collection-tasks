@@ -46,6 +46,12 @@ backup_db_dump_format: .sql.gz
 
 backup_with_mysql: false
 backup_with_postgresql: false
+
+# If remote postgresql server is used, you can use this to connect to it.
+# backup_postgresql_host:
+# backup_postgresql_port:
+# backup_postgresql_user:
+
 # all databases are stored in one dump file for mongodb
 # (use can use mongorestore with --db to restore a specific database)
 backup_with_mongodb: false
