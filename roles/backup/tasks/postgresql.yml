@@ -25,4 +25,3 @@
   loop_control:
     loop_var: db
   when: backup_postgresql_db is defined
-
