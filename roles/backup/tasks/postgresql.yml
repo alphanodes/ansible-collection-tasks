@@ -5,9 +5,9 @@
     - name: Get postgresql databases
       community.postgresql.postgresql_query:
         query: SELECT datname AS database FROM pg_database WHERE NOT datistemplate AND datname <> 'postgres'
-        login_host: '{{ backup_postgresql_host | default(omit) }}'
         login_db: postgres
         login_user: '{{ backup_postgresql_user | default(omit) }}'
+        login_host: '{{ backup_postgresql_host | default(omit) }}'
         port: '{{ backup_postgresql_port | default(omit) }}'
       register: db_list
       become_user: postgres
