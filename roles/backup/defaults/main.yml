@@ -75,6 +75,8 @@ backup_postgresqldump_options: "-n public --no-owner -Fc"
 backup_create_hashfiles: false
 backup_files_unsafe_writes: false
 
+backup_postgresql_file_owner: postgres
+
 # true, if you want to encrypt backup files
 # NOTE: backup_file_encrypt_password is required for it
 backup_file_encrypted: false
