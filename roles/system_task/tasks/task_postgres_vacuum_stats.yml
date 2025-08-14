@@ -1,6 +1,6 @@
 ---
 
-# @see https://www.postgresql.org/docs/12/monitoring-stats.html
+# @see https://www.postgresql.org/docs/17/monitoring-stats.html
 
 - name: Generate postgres stats for {{ database }}
   block:

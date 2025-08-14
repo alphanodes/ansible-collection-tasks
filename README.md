@@ -19,8 +19,8 @@
 This collection provides tasks for:
 
 - Linux operating systems:
-  - Debian 10/11/12
-  - Ubuntu 20.04/22.04
+  - Debian 11/12/13
+  - Ubuntu 22.04/24.04
 
 ## Minimum required Ansible-version
 
