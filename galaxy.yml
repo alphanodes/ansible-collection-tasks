@@ -23,9 +23,6 @@ tags:
   - sync
   - watch
 
-dependencies:
-  ansible.posix: '>=1.4.0'
-
 repository: 'https://github.com/alphanodes/ansible-collection-tasks/'
 homepage: 'https://alphanodes.com'
 issues: 'https://github.com/alphanodes/ansible-collection-tasks/issues'
