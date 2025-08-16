@@ -6,6 +6,6 @@
   when: system_task_service_name | length == 0
 
 - name: Restart system service - {{ system_task_service_name }}
-  ansible.builtin.systemd:
+  ansible.builtin.systemd_service:
     name: '{{ system_task_service_name }}'
     state: "{{ 'reloaded' if system_task_service_reload else 'restarted' }}"
