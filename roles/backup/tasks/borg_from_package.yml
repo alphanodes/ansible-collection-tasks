@@ -5,6 +5,13 @@
     state: present
   when: not backup_borg_install_from_binary
 
+# python3-pyfuse3 is not removed after installing it
+- name: Install pyfuse3 for mount support
+  ansible.builtin.apt:
+    name: python3-pyfuse3
+    state: present
+  when: not backup_borg_install_from_binary
+
 - name: Uninstall borg package, if from binary
   ansible.builtin.apt:
     name: borgbackup
