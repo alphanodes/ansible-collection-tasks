@@ -135,8 +135,7 @@ backup_borg_passphrase2: ''
 
 backup_borg_prune_keep_daily: 7
 backup_borg_prune_keep_weekly: 4
-backup_borg_prune_keep_monthly: 2
-backup_borg_prune_keep_yearly: 1
+backup_borg_prune_keep_monthly: 1
 
 # see https://borgbackup.readthedocs.io/en/stable/usage/create.html#
 backup_borg_compression: auto,zlib,6
@@ -145,7 +144,9 @@ backup_borg_create_name: '{hostname}-{now:%Y-%m-%d_%H:%M}'
 backup_borg_create_params: '--compression {{ backup_borg_compression }} -v --stats'
 backup_borg_encryption_mode: repokey
 backup_borg_with_prune: true
-backup_borg_prune_params: '-v --list'
+backup_borg_prune_params: '-v --show-rc --list'
+backup_borg_with_compact: true
+backup_borg_compact_params: '-v --show-rc'
 backup_borg_with_check: true
 backup_borg_check_params: '-v'
 backup_borg_with_info: true

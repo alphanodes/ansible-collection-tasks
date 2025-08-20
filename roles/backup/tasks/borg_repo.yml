@@ -49,11 +49,20 @@
         --keep-daily={{ backup_borg_prune_keep_daily }}
         --keep-weekly={{ backup_borg_prune_keep_weekly }}
         --keep-monthly={{ backup_borg_prune_keep_monthly }}
-        --keep-yearly={{ backup_borg_prune_keep_yearly }}
         {{ borg_repo }}
       environment:
         BORG_PASSPHRASE: '{{ borg_passphrase }}'
       when: backup_borg_with_prune
+
+    - name: Run borg compact
+      ansible.builtin.command: >
+        {{ borg_binary }}
+        compact
+        {{ backup_borg_compact_params }}
+        {{ borg_repo }}
+      environment:
+        BORG_PASSPHRASE: '{{ borg_passphrase }}'
+      when: backup_borg_with_compact
 
     - name: Run borg check (if activated) - {{ borg_repo_name }}
       ansible.builtin.command: >
