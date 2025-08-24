@@ -10,7 +10,7 @@
   when: instance.rotation is defined and not (instance.rotation | bool)
 
 # see https://docs.ansible.com/ansible/latest/collections/community/general/archive_module.html
-# TODO: archive only creates files with absolute path
+# see some help for exclude path here https://github.com/ansible-collections/community.general/issues/593
 - name: Create backup of files/directories - {{ instance.name }}
   community.general.archive:
     path: '{{ instance.src }}'
