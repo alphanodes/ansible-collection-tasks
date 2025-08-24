@@ -142,7 +142,8 @@ backup_borg_compression: auto,zlib,6
 backup_borg_create_name: '{hostname}-{now:%Y-%m-%d_%H:%M}'
 # use it for e.g. --one-file-system
 backup_borg_create_params: '--compression {{ backup_borg_compression }} -v --stats'
-backup_borg_encryption_mode: repokey
+# see https://borgbackup.readthedocs.io/en/stable/usage/init.html#more-encryption-modes
+backup_borg_encryption_mode: keyfile-blake2
 backup_borg_with_prune: true
 backup_borg_prune_params: '-v --show-rc --list'
 backup_borg_with_compact: true
