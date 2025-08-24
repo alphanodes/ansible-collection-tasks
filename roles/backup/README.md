@@ -247,7 +247,7 @@ List of commands, which runs after backup dump has been created.
       - name: jenkins
         src: /var/lib/jenkins
         unsafe_writes: true
-        excludes:
+        exclude_path:
           - builds
           - workspace
 
