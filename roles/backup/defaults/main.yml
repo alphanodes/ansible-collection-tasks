@@ -73,7 +73,8 @@ backup_mysql_defaults_extra_file: ''
 
 backup_postgresqldump_options: "-n public --no-owner -Fc"
 backup_create_hashfiles: false
-backup_files_unsafe_writes: false
+# set it if you need it
+# backup_files_unsafe_writes: false
 
 backup_postgresql_file_owner: postgres
 
