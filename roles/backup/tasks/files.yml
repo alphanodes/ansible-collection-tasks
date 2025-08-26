@@ -19,7 +19,7 @@
         var: rsync_result.stdout_lines
 
 - name: tar.gz mode active
-  when: instance.type is undefined or instance_type == 'tar.gz'
+  when: instance.type is undefined or instance.type == 'tar.gz'
   block:
     - name: Set fact backup_file_name with rotation
       ansible.builtin.set_fact:
