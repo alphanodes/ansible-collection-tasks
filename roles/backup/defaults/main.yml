@@ -89,6 +89,10 @@ backup_sets: []
 # - name: etc
 #   src: /etc
 
+backup_set_rsync_default_options: '-avx --delete'
+backup_set_rsync_default_export:
+  - '.nfs*'
+
 # create only one backup per day
 # (existing backup of same day will be removed)
 backup_one_per_day_limit: true

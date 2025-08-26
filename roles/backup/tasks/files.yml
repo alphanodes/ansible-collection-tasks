@@ -1,38 +1,60 @@
 ---
-- name: Set fact backup_file_name with rotation
-  ansible.builtin.set_fact:
-    backup_file_name: "{{ instance.name }}-{{ date_stamp }}-{{ backup_file_period }}.tar.gz"
-  when: instance.rotation is undefined or instance.rotation | bool
 
-- name: Set fact backup_file_name without rotation
-  ansible.builtin.set_fact:
-    backup_file_name: "{{ instance.name }}.tar.gz"
-  when: instance.rotation is defined and not (instance.rotation | bool)
+# no rotation support for rsync mode
+- name: Rsync mode active
+  when: instance.type is defined and instance.type == 'rsync'
+  block:
+    - name: Be sure rsync is installed
+      ansible.builtin.apt:
+        name: rsync
+        state: present
 
-# see https://docs.ansible.com/ansible/latest/collections/community/general/archive_module.html
-# see some help for exclude path here https://github.com/ansible-collections/community.general/issues/593
-- name: Create backup of files/directories - {{ instance.name }}
-  community.general.archive:
-    path: '{{ instance.src }}'
-    dest: '{{ backup_dir }}/{{ backup_file_name }}'
-    format: gz
-    mode: '0644'
-    exclusion_patterns: '{{ instance.exclusion_patterns | default(omit) }}'
-    exclude_path: '{{ instance.exclude_path | default(omit) }}'
-    unsafe_writes: '{{ instance.unsafe_writes | default(backup_files_unsafe_writes) | default(omit) }}'
-  become: "{{ backup_files_become | default(omit) }}"
-  become_user: '{{ backup_files_become_user | default(omit) }}'
+    - name: Sync files to local directory
+      ansible.builtin.command: rsync {{ instance.rsync_options | default(backup_set_rsync_default_options) }} --exclude={{ backup_set_rsync_default_exclude | join(' --exclude=') | default('') }} {{ instance.src }}/ {{ backup_dir }}/{{ instance.name }}
+      register: rsync_result
+      changed_when: sync_result.stdout_lines | length != 4
 
-- name: Include encrypt file
-  ansible.builtin.include_tasks: file_encrypt.yml
-  vars:
-    file_path: '{{ backup_dir }}/{{ backup_file_name }}'
-    file_owner: "{{ backup_files_become_user | default('root') }}"
-  when: backup_file_encrypted
+    - name: Output of rsync
+      ansible.builtin.debug:
+        var: rsync_result.stdout_lines
 
-- name: Include checksum file
-  ansible.builtin.include_tasks: file_checksum.yml
-  vars:
-    file_path: "{{ backup_dir }}/{{ backup_file_name + '.gpg' if backup_file_encrypted else backup_file_name }}"
-    file_owner: "{{ backup_files_become_user | default('root') }}"
-  when: backup_create_hashfiles
+- name: tar.gz mode active
+  when: instance.type is undefined or instance_type == 'tar.gz'
+  block:
+    - name: Set fact backup_file_name with rotation
+      ansible.builtin.set_fact:
+        backup_file_name: "{{ instance.name }}-{{ date_stamp }}-{{ backup_file_period }}.tar.gz"
+      when: instance.rotation is undefined or instance.rotation | bool
+
+    - name: Set fact backup_file_name without rotation
+      ansible.builtin.set_fact:
+        backup_file_name: "{{ instance.name }}.tar.gz"
+      when: instance.rotation is defined and not (instance.rotation | bool)
+
+    # see https://docs.ansible.com/ansible/latest/collections/community/general/archive_module.html
+    # see some help for exclude path here https://github.com/ansible-collections/community.general/issues/593
+    - name: Create backup of files/directories - {{ instance.name }}
+      community.general.archive:
+        path: '{{ instance.src }}'
+        dest: '{{ backup_dir }}/{{ backup_file_name }}'
+        format: gz
+        mode: '0644'
+        exclusion_patterns: '{{ instance.exclusion_patterns | default(omit) }}'
+        exclude_path: '{{ instance.exclude_path | default(omit) }}'
+        unsafe_writes: '{{ instance.unsafe_writes | default(backup_files_unsafe_writes) | default(omit) }}'
+      become: "{{ backup_files_become | default(omit) }}"
+      become_user: '{{ backup_files_become_user | default(omit) }}'
+
+    - name: Include encrypt file
+      ansible.builtin.include_tasks: file_encrypt.yml
+      vars:
+        file_path: '{{ backup_dir }}/{{ backup_file_name }}'
+        file_owner: "{{ backup_files_become_user | default('root') }}"
+      when: backup_file_encrypted
+
+    - name: Include checksum file
+      ansible.builtin.include_tasks: file_checksum.yml
+      vars:
+        file_path: "{{ backup_dir }}/{{ backup_file_name + '.gpg' if backup_file_encrypted else backup_file_name }}"
+        file_owner: "{{ backup_files_become_user | default('root') }}"
+      when: backup_create_hashfiles
