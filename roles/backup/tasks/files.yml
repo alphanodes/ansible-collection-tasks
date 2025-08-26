@@ -10,7 +10,7 @@
         state: present
 
     - name: Sync files to local directory
-      ansible.builtin.command: rsync {{ instance.rsync_options | default(backup_set_rsync_default_options) }} --exclude={{ backup_set_rsync_default_exclude | join(' --exclude=') | default('') }} {{ instance.src }}/ {{ backup_dir }}/{{ instance.name }}
+      ansible.builtin.command: rsync {{ instance.rsync_options | default(backup_set_rsync_default_options) }} --exclude={{ instance.rsync_exclude | backup_set_rsync_default_exclude | join(' --exclude=') | default('') }} {{ instance.src }}/ {{ backup_dir }}/{{ instance.name }}
       register: rsync_result
       changed_when: sync_result.stdout_lines | length != 4
 
