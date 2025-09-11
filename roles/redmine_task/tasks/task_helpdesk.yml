@@ -61,4 +61,4 @@
 - name: Test for failure of poll mails - {{ instance_name }}
   ansible.builtin.fail:
     msg: "Errors found."
-  when: (json_response.content|from_json)['errors'] | length
+  when: (json_response.content|from_json)['errors'] | length > 0

@@ -9,11 +9,11 @@
     var: pgbadger_result.stdout_lines
   when:
     - pgbadger_result is defined
-    - pgbadger_result.stdout_lines | length
+    - pgbadger_result.stdout_lines | length > 0
 
 - name: Script errors
   ansible.builtin.debug:
     var: pgbadger_result.stderr_lines
   when:
     - pgbadger_result is defined
-    - pgbadger_result.stderr_lines | length
+    - pgbadger_result.stderr_lines | length > 0

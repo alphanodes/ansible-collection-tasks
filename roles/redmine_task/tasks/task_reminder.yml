@@ -4,7 +4,7 @@
   args:
     chdir: '{{ redmine_app_dir }}'
   register: reminder
-  changed_when: reminder.stdout_lines | length
+  changed_when: reminder.stdout_lines | length > 0
   become: true
   become_user: '{{ redmine_user }}'
   environment:
@@ -13,4 +13,4 @@
 - name: Output of reminder - {{ instance_name }}
   ansible.builtin.debug:
     var: reminder.stdout_lines
-  when: reminder.stdout_lines | length
+  when: reminder.stdout_lines | length > 0

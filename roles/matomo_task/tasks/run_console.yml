@@ -17,4 +17,4 @@
     var: console_result.stdout_lines
   when:
     - console_result.stdout_lines is defined
-    - console_result.stdout_lines | length
+    - console_result.stdout_lines | length > 0

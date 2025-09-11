@@ -18,4 +18,4 @@
 - name: Output of automation jobs - {{ instance_name }}
   ansible.builtin.debug:
     var: automation_jobs.stdout_lines
-  when: automation_jobs.stdout_lines | length
+  when: automation_jobs.stdout_lines | length > 0

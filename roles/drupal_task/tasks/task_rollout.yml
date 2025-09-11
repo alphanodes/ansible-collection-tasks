@@ -79,12 +79,12 @@
         - name: Output of composer - {{ instance.name }}
           ansible.builtin.debug:
             var: composer_result.stdout_lines
-          when: composer_result.stdout_lines | length
+          when: composer_result.stdout_lines | length > 0
 
         - name: Output of composer errors (stderr) - {{ instance.name }}
           ansible.builtin.debug:
             var: composer_result.stderr_lines
-          when: composer_result.stderr_lines | length
+          when: composer_result.stderr_lines | length > 0
 
     - name: Run drush status
       when: drupal_rollout_with_drush_status
@@ -99,12 +99,12 @@
         - name: Output of drush status - {{ instance.name }}
           ansible.builtin.debug:
             var: status_result.stdout_lines
-          when: status_result.stdout_lines | length
+          when: status_result.stdout_lines | length > 0
 
         - name: Output of drush status errors (stderr) - {{ instance.name }}
           ansible.builtin.debug:
             var: status_result.stderr_lines
-          when: status_result.stderr_lines | length
+          when: status_result.stderr_lines | length > 0
 
     - name: Run db update
       when: rollout_with_updatedb
@@ -119,12 +119,12 @@
         - name: Output of updatedb - {{ instance.name }}
           ansible.builtin.debug:
             var: update_result.stdout_lines
-          when: update_result.stdout_lines | length
+          when: update_result.stdout_lines | length > 0
 
         - name: Output of updatedb errors (stderr) - {{ instance.name }}
           ansible.builtin.debug:
             var: update_result.stderr_lines
-          when: update_result.stderr_lines | length
+          when: update_result.stderr_lines | length > 0
 
     - name: Run entity-updates
       when: rollout_with_entity_updates
@@ -137,12 +137,12 @@
         - name: Output of entity-updates - {{ instance.name }}
           ansible.builtin.debug:
             var: entity_result.stdout_lines
-          when: entity_result.stdout_lines | length
+          when: entity_result.stdout_lines | length > 0
 
         - name: Output of entity-updates (stderr) - {{ instance.name }}
           ansible.builtin.debug:
             var: entity_result.stderr_lines
-          when: entity_result.stderr_lines | length
+          when: entity_result.stderr_lines | length > 0
 
     - name: Run config import
       when: >
@@ -159,12 +159,12 @@
         - name: Output of cim - {{ instance.name }}
           ansible.builtin.debug:
             var: cim_result.stdout_lines
-          when: cim_result.stdout_lines | length
+          when: cim_result.stdout_lines | length > 0
 
         - name: Output of cim (stderr) - {{ instance.name }}
           ansible.builtin.debug:
             var: cim_result.stderr_lines
-          when: cim_result.stderr_lines | length
+          when: cim_result.stderr_lines | length > 0
 
     - name: Run cache-rebuild
       when: rollout_with_cache_clear
@@ -176,12 +176,12 @@
         - name: Output of cache-rebuild - {{ instance.name }}
           ansible.builtin.debug:
             var: cache_result.stdout_lines
-          when: cache_result.stdout_lines | length
+          when: cache_result.stdout_lines | length > 0
 
         - name: Output of cache-rebuild (stderr) - {{ instance.name }}
           ansible.builtin.debug:
             var: cache_result.stderr_lines
-          when: cache_result.stderr_lines | length
+          when: cache_result.stderr_lines | length > 0
 
     - name: Run cron
       when: rollout_with_cron
@@ -194,9 +194,9 @@
         - name: Output of cron - {{ instance.name }}
           ansible.builtin.debug:
             var: cron_result.stdout_lines
-          when: cron_result.stdout_lines | length
+          when: cron_result.stdout_lines | length > 0
 
         - name: Output of cron (stderr) - {{ instance.name }}
           ansible.builtin.debug:
             var: cron_result.stderr_lines
-          when: cron_result.stderr_lines | length
+          when: cron_result.stderr_lines | length > 0

@@ -14,4 +14,4 @@
 - name: Output of rebuild_index - {{ instance_name }}
   ansible.builtin.debug:
     var: rebuild_index.stdout_lines
-  when: rebuild_index.stdout_lines | length
+  when: rebuild_index.stdout_lines | length > 0

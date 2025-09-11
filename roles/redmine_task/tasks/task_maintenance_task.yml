@@ -12,4 +12,4 @@
 - name: Output of maintenance task {{ task }}
   ansible.builtin.debug:
     var: task_rc.stdout_lines
-  when: task_rc.stdout_lines | length
+  when: task_rc.stdout_lines | length > 0

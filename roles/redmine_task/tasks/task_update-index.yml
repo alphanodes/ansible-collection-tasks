@@ -14,4 +14,4 @@
 - name: Output of update_index - {{ instance_name }}
   ansible.builtin.debug:
     var: update_index.stdout_lines
-  when: update_index.stdout_lines | length
+  when: update_index.stdout_lines | length > 0

@@ -36,7 +36,7 @@
   args:
     chdir: '{{ redmine_app_dir }}'
   register: receive
-  changed_when: receive.stdout_lines | length
+  changed_when: receive.stdout_lines | length > 0
   no_log: '{{ mails_no_log }}'
   become: true
   become_user: '{{ redmine_user }}'
@@ -47,4 +47,4 @@
 - name: Output of receive for - {{ account.name }}
   ansible.builtin.debug:
     var: receive.stdout_lines
-  when: receive.stdout_lines | length
+  when: receive.stdout_lines | length > 0

@@ -11,4 +11,4 @@
     var: task_result.stdout_lines
   when:
     - task_result.stdout_lines is defined
-    - task_result.stdout_lines | length
+    - task_result.stdout_lines | length > 0
