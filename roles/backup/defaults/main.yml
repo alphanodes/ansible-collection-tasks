@@ -157,3 +157,8 @@ backup_borg_with_check: true
 backup_borg_check_params: '-v'
 backup_borg_with_info: true
 backup_borg_info_params: '-v'
+
+# required globally for mysql auth_socket support
+# caching_sha2_password or auth_socket
+mysql_root_plugin: caching_sha2_password
+mysql_socket: /run/mysqld/mysqld.sock
