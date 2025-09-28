@@ -9,7 +9,7 @@ system_watch_repo_version: main
 srv_path: /srv
 
 system_watch_dir: '{{ srv_path }}/.log'
-system_watch_host: '{{ ansible_hostname }}'
+system_watch_host: '{{ hostname_short | default(ansible_hostname) }}'
 
 system_watch_rsync_opts:
   - "--delete-excluded"
