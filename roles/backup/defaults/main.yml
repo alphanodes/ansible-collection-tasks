@@ -38,7 +38,14 @@ backup_remote_password: ''
 backup_lftp_mirror_options: '--reverse --continue --delete --no-perms --verbose'
 
 # has to end with ;
-backup_lftp_pre_commands: 'set ssl:verify-certificate false;'
+# Timeout and connection settings to handle unstable network connections.
+# See: https://lftp.yar.ru/lftp-man.html (section SETTINGS)
+# - net:timeout: abort operation if no data transfer (default: 5m = 300s)
+# - net:reconnect-interval-base: wait time before reconnecting (default: 15s)
+# - net:max-retries: retry failed operations (default: 1000)
+# - mirror:parallel-transfer-count: parallel file transfers (default: 0 = auto)
+# - dns:order: prefer IPv4 over IPv6 to avoid IPv6 routing issues (default: "inet6 inet")
+backup_lftp_pre_commands: 'set ssl:verify-certificate false; set net:timeout 300; set net:reconnect-interval-base 30; set net:max-retries 5; set mirror:parallel-transfer-count 1; set dns:order "inet";'
 
 # Uncompressed SQL files (.sql) as well as bzip2 (.bz2), gzip (.gz) and xz
 # (at the moment only used for mysql dumps)

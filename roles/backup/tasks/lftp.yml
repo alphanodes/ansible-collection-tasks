@@ -17,6 +17,9 @@
   ansible.builtin.command: lftp -c "{{ backup_lftp_pre_commands }} open -u {{ backup_remote_user }},{{ backup_remote_password }} {{ backup_remote_host }}; mirror {{ backup_lftp_mirror_options }} {{ backup_dir }} {{ backup_remote_dir }}"
   register: lftp_result
   changed_when: "'Transferring file' in lftp_result.stdout or 'Removing old file' in lftp_result.stdout"
+  retries: 3
+  delay: 60
+  until: lftp_result.rc == 0
 
 - name: Output of lftp sync
   ansible.builtin.debug:
