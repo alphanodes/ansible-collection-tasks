@@ -131,18 +131,6 @@ backup_with_postgresql: false
 Run PostgreSQL backup dump. All databases are stored in separate files.
 
 ```yaml
-backup_with_mongodb: false
-```
-
-Run MongoDB backup dump. All databases are stored in a single archive file.
-
-```yaml
-backup_mongodb_options: '--archive --gzip'
-```
-
-Options for mongodb dump.
-
-```yaml
 backup_mysql_db_excludes:
   - performance_schema
   - information_schema

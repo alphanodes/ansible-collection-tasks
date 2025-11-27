@@ -59,12 +59,6 @@ backup_with_postgresql: false
 # backup_postgresql_port:
 # backup_postgresql_user:
 
-# all databases are stored in one dump file for mongodb
-# (use can use mongorestore with --db to restore a specific database)
-backup_with_mongodb: false
-
-backup_mongodb_options: '--archive --gzip'
-
 backup_mysql_db_excludes:
   - performance_schema
   - information_schema
