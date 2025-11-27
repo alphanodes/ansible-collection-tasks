@@ -10,7 +10,7 @@ Available variables are listed below, along with default values (see `defaults/m
 system_task_name: ''
 ```
 
-`system_task_name` can be set to `service_restart`, `goaccess`, `pgbadger_query`, `postgres_vacuum` or `reboot`.
+`system_task_name` can be set to `service_restart`, `goaccess`,  `postgres_vacuum` or `reboot`.
 
 ```yaml
 system_task_reboot_delay: 10

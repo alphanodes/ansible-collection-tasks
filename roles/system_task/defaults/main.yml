@@ -19,14 +19,6 @@ system_task_postgres_user: postgres
 system_task_postgres_quiet: false
 system_task_postgres_vacuum_options: --all --analyze {{ ' --quiet' if system_task_postgres_quiet else '' }}
 
-system_task_pgbadger_query_log: ''
-# system_task_pgbadger_query_log: /var/log/postgresql/postgresql-{{ postgresql_version | default('16') }}-main.log
-system_task_pgbadger_query_outdir: '{{ postgresql_pgbadger_output_dir }}'
-# system_task_pgbadger_query_options: -v -I -o index.html
-# see https://pgbadger.darold.net/documentation.html
-# issues: https://github.com/darold/pgbadger/issues
-system_task_pgbadger_query_options: -v -I -f syslog --exclude-appname pg_dump --exclude-appname bin/about --prefix 'user=%u,db=%d,app=%a,client=%h ' --journalctl 'journalctl -t postgres' -o index.html
-
 system_task_goaccess_index_file: index.html
 system_task_goaccess_output_dir: /var/www/goaccess
 system_task_goaccess_nginx_log: /var/log/nginx/access.log /var/log/nginx/access.log.1
