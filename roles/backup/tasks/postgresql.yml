@@ -9,7 +9,7 @@
         login_user: '{{ backup_postgresql_user | default(omit) }}'
         login_password: '{{ backup_postgresql_password | default(omit) }}'
         login_host: '{{ backup_postgresql_host | default(omit) }}'
-        port: '{{ backup_postgresql_port | default(omit) }}'
+        login_port: '{{ backup_postgresql_port | default(omit) }}'
       register: db_list
       become_user: postgres
       become: true

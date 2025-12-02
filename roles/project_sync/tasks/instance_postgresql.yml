@@ -70,7 +70,7 @@
     login_host: '{{ instance.db_source_host | default(omit) }}'
     login_user: '{{ instance.db_target_owner }}'
     login_db: '{{ instance.db_target_name }}'
-    port: '{{ instance.db_source_port | default(omit) }}'
+    login_port: '{{ instance.db_source_port | default(omit) }}'
   loop: '{{ instance.pre_sql_commands | default([]) }}'
 
 - name: Import database dump - {{ instance.name }}
@@ -98,5 +98,5 @@
     login_host: '{{ instance.db_source_host | default(omit) }}'
     login_user: '{{ instance.db_target_owner }}'
     login_db: '{{ instance.db_target_name }}'
-    port: '{{ instance.db_source_port | default(omit) }}'
+    login_port: '{{ instance.db_source_port | default(omit) }}'
   loop: '{{ instance.post_sql_commands | default([]) }}'
