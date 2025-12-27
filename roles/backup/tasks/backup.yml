@@ -13,7 +13,7 @@
 
 - name: Calc daily, weekly or monthly period
   ansible.builtin.set_fact:
-    backup_file_period: "{{ 'monthly' if ansible_date_time.day == '01' and backup_max_months > 0 else 'weekly' if ansible_date_time.weekday_number == '1' and backup_max_weeks > 0 else 'daily' }}"
+    backup_file_period: "{{ 'monthly' if ansible_facts.date_time.day == '01' and backup_max_months > 0 else 'weekly' if ansible_facts.date_time.weekday_number == '1' and backup_max_weeks > 0 else 'daily' }}"
 
 - name: Ensures backup_dir exists
   ansible.builtin.file:

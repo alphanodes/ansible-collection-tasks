@@ -2,7 +2,7 @@
 
 - name: Set fact working_dir
   ansible.builtin.set_fact:
-    working_dir: "/tmp/matomo-geoip-working-dir-{{ ansible_date_time.date }}"
+    working_dir: "/tmp/matomo-geoip-working-dir-{{ ansible_facts.date_time.date }}"
 
 - name: Set fact archive_file
   ansible.builtin.set_fact:

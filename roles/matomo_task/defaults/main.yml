@@ -19,5 +19,5 @@ matomo_console_name: ''
 matomo_task_name: ''
 
 matomo_task_geo_target_file: DBIP-City.mmdb
-matomo_task_geo_source_file: dbip-city-lite-{{ ansible_date_time.year }}-{{ ansible_date_time.month }}.mmdb
+matomo_task_geo_source_file: dbip-city-lite-{{ ansible_facts.date_time.year }}-{{ ansible_facts.date_time.month }}.mmdb
 matomo_task_geo_url: https://download.db-ip.com/free/{{ matomo_task_geo_source_file }}.gz
