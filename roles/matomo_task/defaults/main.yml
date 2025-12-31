@@ -21,3 +21,12 @@ matomo_task_name: ''
 matomo_task_geo_target_file: DBIP-City.mmdb
 matomo_task_geo_source_file: dbip-city-lite-{{ ansible_facts.date_time.year }}-{{ ansible_facts.date_time.month }}.mmdb
 matomo_task_geo_url: https://download.db-ip.com/free/{{ matomo_task_geo_source_file }}.gz
+
+# MySQL backend selection: mysql (Oracle MySQL) or mariadb (Debian/Ubuntu native)
+# Passed from ansible_node playbook generation
+mysql_backend: mysql
+
+# required globally for mysql auth_socket support
+# caching_sha2_password (MySQL) or mysql_native_password (MariaDB) or auth_socket
+mysql_root_plugin: "{{ 'mysql_native_password' if mysql_backend == 'mariadb' else 'caching_sha2_password' }}"
+mysql_socket: /run/mysqld/mysqld.sock

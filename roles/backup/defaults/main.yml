@@ -159,7 +159,11 @@ backup_borg_check_params: '-v'
 backup_borg_with_info: true
 backup_borg_info_params: '-v'
 
+# MySQL backend selection: mysql (Oracle MySQL) or mariadb (Debian/Ubuntu native)
+# Passed from ansible_node playbook generation
+mysql_backend: mysql
+
 # required globally for mysql auth_socket support
-# caching_sha2_password or auth_socket
-mysql_root_plugin: caching_sha2_password
+# caching_sha2_password (MySQL) or mysql_native_password (MariaDB) or auth_socket
+mysql_root_plugin: "{{ 'mysql_native_password' if mysql_backend == 'mariadb' else 'caching_sha2_password' }}"
 mysql_socket: /run/mysqld/mysqld.sock
