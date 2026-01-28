@@ -46,10 +46,8 @@ backup_lftp_mirror_options: '--reverse --continue --delete --no-perms --verbose'
 # - net:max-retries: retry failed operations (default: 1000)
 # - mirror:parallel-transfer-count: parallel file transfers (default: 0 = auto)
 # - dns:order: prefer IPv4 over IPv6 to avoid IPv6 routing issues (default: "inet6 inet")
-# For unstable connections, consider adding in host_vars:
-# - ftp:ssl-protect-data on: encrypt data channel, not just control channel
-# - ftp:use-epsv off: use standard PASV instead of Extended Passive Mode
-# - net:socket-buffer: larger buffer for better throughput (e.g. 16777216)
+# For unstable connections (connection reset errors), consider adding in host_vars:
+# - net:socket-buffer: larger buffer for better throughput (e.g. 16777216 = 16MB)
 backup_lftp_pre_commands: >-
   set ssl:verify-certificate false;
   set net:timeout 300;
