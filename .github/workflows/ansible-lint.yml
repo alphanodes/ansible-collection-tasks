@@ -21,10 +21,18 @@ jobs:
       ANSIBLE_FORCE_COLOR: 1
 
     steps:
-      # Important: This sets up your GITHUB_WORKSPACE environment variable
       - uses: actions/checkout@v5
 
-      - name: Lint Ansible Playbook
-        uses: ansible/ansible-lint@main
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          requirements_file: testing_requirements.yml
+          python-version: '3.13'
+
+      - name: Install ansible-lint
+        run: pip install ansible-lint
+
+      - name: Install Ansible collections
+        run: ansible-galaxy collection install -r testing_requirements.yml
+
+      - name: Run ansible-lint
+        run: ansible-lint
