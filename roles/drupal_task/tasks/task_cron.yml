@@ -2,7 +2,7 @@
 - name: Run drupal cron (drush) - {{ instance.name }}
   become: "{{ true if drush_user is defined else false }}"
   become_user: '{{ drush_user | default(omit) }}'
-  ansible.builtin.command: '{{ instance.drush_path | default(drush_path) }} @{{ instance.name }} cron'
+  ansible.builtin.command: '{{ instance.drush_path | default(drush_path) }} @{{ instance.drush_profile | default(instance.name) }} cron'
   when: >
     (mysql_replication_role is undefined or mysql_replication_role == 'master')
     and sync_master is undefined

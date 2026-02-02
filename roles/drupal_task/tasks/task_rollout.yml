@@ -90,7 +90,7 @@
       when: drupal_rollout_with_drush_status
       block:
         - name: Run drush status - {{ instance.name }}
-          ansible.builtin.command: '{{ instance.drush_path | default(drush_path) }} @{{ instance.name }} status'
+          ansible.builtin.command: '{{ instance.drush_path | default(drush_path) }} @{{ instance.drush_profile | default(instance.name) }} status'
           args:
             chdir: "{{ instance.dir }}"
           register: status_result
