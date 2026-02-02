@@ -8,6 +8,7 @@
     rollout_with_cim: "{{ instance.rollout_with_cim | default(drupal_rollout_with_cim) }}"
     real_composer_path: "{{ instance.composer_path | default('') }}"
     real_vhost_dir: "{{ instance.dir }}{{ instance.vhost_dir | default(drupal_vhost_dir) }}"
+    real_drush_profile: "@{{ instance.drush_profile | default(instance.name) }}"
 
 - name: Set real_composer_bin - {{ instance.name }}
   ansible.builtin.set_fact:
@@ -89,19 +90,19 @@
     - name: Run drush status
       when: drupal_rollout_with_drush_status
       block:
-        - name: Run drush status - {{ instance.name }}
-          ansible.builtin.command: '{{ instance.drush_path | default(drush_path) }} @{{ instance.drush_profile | default(instance.name) }} status'
+        - name: Run drush status with profile {{ real_drush_profile }}
+          ansible.builtin.command: '{{ instance.drush_path | default(drush_path) }} {{ real_drush_profile }} status'
           args:
             chdir: "{{ instance.dir }}"
           register: status_result
           changed_when: status_result.rc != 0
 
-        - name: Output of drush status - {{ instance.name }}
+        - name: Output of drush status
           ansible.builtin.debug:
             var: status_result.stdout_lines
           when: status_result.stdout_lines | length > 0
 
-        - name: Output of drush status errors (stderr) - {{ instance.name }}
+        - name: Output of drush status errors (stderr)
           ansible.builtin.debug:
             var: status_result.stderr_lines
           when: status_result.stderr_lines | length > 0
