@@ -16,8 +16,8 @@
         path: '{{ working_dir }}'
         state: directory
         mode: '0755'
-        owner: root
-        group: root
+        owner: '{{ matomo_task_working_dir_owner | default(omit, true) }}'
+        group: '{{ matomo_task_working_dir_group | default(omit, true) }}'
 
     - name: Get archive file info
       ansible.builtin.stat:
@@ -30,8 +30,8 @@
         url: '{{ matomo_task_geo_url }}'
         dest: '{{ archive_file }}.gz'
         mode: '0644'
-        owner: root
-        group: root
+        owner: '{{ matomo_task_working_dir_owner | default(omit, true) }}'
+        group: '{{ matomo_task_working_dir_group | default(omit, true) }}'
       when: not archive_file_exists.stat.exists
 
     # there is not ansible command for gunzip at the moment

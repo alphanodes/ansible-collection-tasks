@@ -4,6 +4,11 @@
 
   vars:
     redmine_task_name: reminder
+    # The actual reminder task needs a working redmine installation
+    # (bundle, rake, user redmine, ACL support). Disable the per-instance
+    # task execution so the test acts as a smoke test for main.yml +
+    # instance.yml (entry validation + per-instance fact setup).
+    redmine_task_multi_instance_default: false
     redmine_instances:
       redmine:
 

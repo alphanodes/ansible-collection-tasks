@@ -2,5 +2,31 @@
 - name: Converge
   hosts: all
 
+  pre_tasks:
+    - name: Install PHP CLI for cron task
+      ansible.builtin.apt:
+        name: php-cli
+        state: present
+        update_cache: true
+        cache_valid_time: 600
+
+    - name: Create dummy nextcloud htdocs directory
+      ansible.builtin.file:
+        path: /srv/nextcloud/htdocs
+        state: directory
+        mode: '0755'
+
+    - name: Create dummy cron.php
+      ansible.builtin.copy:
+        dest: /srv/nextcloud/htdocs/cron.php
+        content: |
+          <?php
+          // dummy cron for molecule test
+        mode: '0644'
+
+  vars:
+    # nextcloud_user is www-data by default; root works in test container
+    nextcloud_user: root
+
   roles:
     - role: alphanodes.tasks.nextcloud_task

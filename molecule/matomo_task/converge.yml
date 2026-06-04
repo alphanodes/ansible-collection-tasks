@@ -2,5 +2,22 @@
 - name: Converge
   hosts: all
 
+  pre_tasks:
+    - name: Create fake matomo directory
+      ansible.builtin.file:
+        path: /srv/matomo/misc
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+  vars:
+    matomo_user: root
+    matomo_task_name: geoip-update
+    # Controller is unprivileged in molecule - skip the chown on the local
+    # working directory by setting empty values (default(omit, true) handles it).
+    matomo_task_working_dir_owner: ''
+    matomo_task_working_dir_group: ''
+
   roles:
     - role: alphanodes.tasks.matomo_task

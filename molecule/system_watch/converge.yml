@@ -9,31 +9,44 @@
         cache_valid_time: 600
       changed_when: false
 
-    - name: Install cron.
+    - name: Install required packages.
       ansible.builtin.apt:
-        name: git
+        name:
+          - git
+          - rsync
         state: present
 
     - name: Set email for git
       ansible.builtin.command: git config --global user.email "me@home.com"
+      changed_when: false
 
     - name: Set name for git
       ansible.builtin.command: git config --global user.user "Just Me"
+      changed_when: false
 
     - name: Set default branch
       ansible.builtin.command: git config --global init.defaultBranch "main"
+      changed_when: false
 
-    - name: Create local git repo for tests
+    - name: Create test git repo directory
+      ansible.builtin.file:
+        path: /git_repo
+        state: directory
+        mode: '0755'
+
+    - name: Initialize local git repo for tests
       ansible.builtin.shell: >
-        mkdir /git_repo &&
-        touch /git_repo/dummy.txt &&
         cd /git_repo &&
         git init &&
+        git config receive.denyCurrentBranch updateInstead &&
+        touch dummy.txt &&
         git add -A &&
         git commit -m 'first commit'
+      args:
+        creates: /git_repo/.git/HEAD
 
   vars:
-    system_watch_repo: file://git_repo
+    system_watch_repo: file:///git_repo
 
   roles:
     - role: alphanodes.tasks.system_watch
