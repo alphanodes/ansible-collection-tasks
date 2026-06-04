@@ -16,6 +16,16 @@
           - rsync
         state: present
 
+    # The role uses 'set -o pipefail' in shell tasks. /bin/sh is dash on
+    # Debian containers, which does not support pipefail. Production servers
+    # typically have bash; in the test container we relink /bin/sh to bash.
+    - name: Ensure /bin/sh is bash (for pipefail support in shell tasks)
+      ansible.builtin.file:
+        src: /bin/bash
+        dest: /bin/sh
+        state: link
+        force: true
+
     - name: Set email for git
       ansible.builtin.command: git config --global user.email "me@home.com"
       changed_when: false
