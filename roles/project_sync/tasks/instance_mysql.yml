@@ -11,7 +11,7 @@
     - instance.db_source_name == instance.db_target_name
 
 - name: Create MySQL database local dump - {{ instance.name }}
-  community.mysql.mysql_db:
+  ansible.mysql.mysql_db:
     login_unix_socket: "{{ mysql_socket if mysql_root_plugin == 'auth_socket' else omit }}"
     name: '{{ instance.db_source_name }}'
     state: dump
@@ -33,7 +33,7 @@
   when: source_host | length > 0
 
 - name: Drop database - {{ instance.name }}
-  community.mysql.mysql_db:
+  ansible.mysql.mysql_db:
     name: '{{ instance.db_target_name }}'
     login_host: '{{ instance.db_target_login_host | default(omit) }}'
     login_unix_socket: '{{ instance.db_target_login_unix_socket | default(omit) }}'
@@ -41,7 +41,7 @@
   when: project_sync_recreate_db
 
 - name: Create database - {{ instance.name }}
-  community.mysql.mysql_db:
+  ansible.mysql.mysql_db:
     name: '{{ instance.db_target_name }}'
     login_host: '{{ instance.db_target_login_host | default(omit) }}'
     login_unix_socket: '{{ instance.db_target_login_unix_socket | default(omit) }}'
@@ -49,14 +49,14 @@
   when: project_sync_recreate_db
 
 - name: Run pre sql commands for MySQL - {{ instance.name }}
-  community.mysql.mysql_query:
+  ansible.mysql.mysql_query:
     login_unix_socket: "{{ mysql_socket if mysql_root_plugin == 'auth_socket' else omit }}"
     login_db: '{{ instance.db_target_name }}'
     query: '{{ item }}'
   loop: '{{ instance.pre_sql_commands | default([]) }}'
 
 - name: Import database dump - {{ instance.name }}
-  community.mysql.mysql_db:
+  ansible.mysql.mysql_db:
     login_unix_socket: "{{ mysql_socket if mysql_root_plugin == 'auth_socket' else omit }}"
     name: '{{ instance.db_target_name }}'
     state: import
@@ -68,7 +68,7 @@
     state: absent
 
 - name: Run post sql commands for MySQL - {{ instance.name }}
-  community.mysql.mysql_query:
+  ansible.mysql.mysql_query:
     login_unix_socket: "{{ mysql_socket if mysql_root_plugin == 'auth_socket' else omit }}"
     login_db: '{{ instance.db_target_name }}'
     query: '{{ item }}'
