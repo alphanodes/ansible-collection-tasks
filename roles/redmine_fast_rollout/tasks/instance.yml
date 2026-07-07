@@ -13,6 +13,20 @@
 - name: Plugin tasks include
   ansible.builtin.include_tasks: instance_plugins.yml
 
+# Reuse the exact patch logic of the full redmine role so force git plugin
+# updates above do not leave unpatched Gemfiles behind (e.g. DMSF ostruct
+# clashing with the Redmine 7 core Gemfile).
+- name: Apply Redmine core patches - {{ instance_name }}
+  ansible.builtin.include_role:
+    name: alphanodes.setup.redmine
+    tasks_from: account_redmine_patch.yml
+  loop: "{{ instance.patches | default([]) }}"
+  loop_control:
+    loop_var: patch
+  vars:
+    redmine_instance: "{{ instance }}"
+    redmine_app_dir: "{{ redmine_dir }}"
+
 - name: Run update
   become: true
   become_user: '{{ instance_name }}'
