@@ -4,7 +4,6 @@
 
   vars:
     project_sync_db_user: project_sync
-    project_sync_db_password: 'a~b}c-molecule#pw'
 
   tasks:
     - name: Update apt cache.
@@ -35,7 +34,7 @@
     - name: Create database user.
       community.postgresql.postgresql_user:
         name: '{{ project_sync_db_user }}'
-        password: '{{ project_sync_db_password }}'
+        password: '{{ molecule_db_password }}'
         role_attr_flags: CREATEDB
       become: true
       become_user: postgres
@@ -77,7 +76,6 @@
 
   vars:
     project_sync_db_user: project_sync
-    project_sync_db_password: 'a~b}c-molecule#pw'
 
   tasks:
     - name: Allow the target host to log in.
@@ -99,7 +97,7 @@
         query: '{{ item }}'
         login_host: 127.0.0.1
         login_user: '{{ project_sync_db_user }}'
-        login_password: '{{ project_sync_db_password }}'
+        login_password: '{{ molecule_db_password }}'
         login_db: project_sync_src
       loop:
         - 'DROP TABLE IF EXISTS sync_check'
@@ -123,7 +121,6 @@
 
   vars:
     project_sync_db_user: project_sync
-    project_sync_db_password: 'a~b}c-molecule#pw'
     project_sync_ssh_options: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
     project_sync_instances:
       # local file sync without database
@@ -162,11 +159,11 @@
         db_source_login_host: 127.0.0.1
         db_source_login_port: 5432
         db_source_login_user: '{{ project_sync_db_user }}'
-        db_source_login_password: '{{ project_sync_db_password }}'
+        db_source_login_password: '{{ molecule_db_password }}'
         db_target_login_host: 127.0.0.1
         db_target_login_port: 5432
         db_target_login_user: '{{ project_sync_db_user }}'
-        db_target_login_password: '{{ project_sync_db_password }}'
+        db_target_login_password: '{{ molecule_db_password }}'
         pre_sql_commands:
           - 'CREATE TABLE pre_marker (note text)'
         post_sql_commands:

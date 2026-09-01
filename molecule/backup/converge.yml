@@ -4,7 +4,6 @@
 
   vars:
     backup_db_user: molecule
-    backup_db_password: 'a~b}c-molecule#pw'
     backup_test_queries:
       - 'DROP TABLE IF EXISTS backup_check'
       - 'CREATE TABLE backup_check (note text)'
@@ -43,7 +42,7 @@
     - name: Create database user.
       community.postgresql.postgresql_user:
         name: '{{ backup_db_user }}'
-        password: '{{ backup_db_password }}'
+        password: '{{ molecule_db_password }}'
       become: true
       become_user: postgres
 
@@ -73,7 +72,7 @@
         query: '{{ item }}'
         login_host: 127.0.0.1
         login_user: '{{ backup_db_user }}'
-        login_password: '{{ backup_db_password }}'
+        login_password: '{{ molecule_db_password }}'
         login_db: molecule_tcp
       loop: '{{ backup_test_queries }}'
 
@@ -96,4 +95,4 @@
         backup_postgresql_host: 127.0.0.1
         backup_postgresql_port: 5432
         backup_postgresql_user: '{{ backup_db_user }}'
-        backup_postgresql_password: '{{ backup_db_password }}'
+        backup_postgresql_password: '{{ molecule_db_password }}'

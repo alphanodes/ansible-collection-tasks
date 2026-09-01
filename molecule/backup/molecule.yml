@@ -19,6 +19,15 @@ provisioner:
   config_options:
     defaults:
       interpreter_python: auto_silent
+  inventory:
+    group_vars:
+      all:
+        # generated once per run into the ephemeral directory, so that no
+        # password literal has to be stored in the repository. The trailing
+        # special characters are part of the test: they are what breaks naive
+        # quoting when the password is handed over to pg_dump.
+        molecule_db_password_file: "{{ lookup('env', 'MOLECULE_EPHEMERAL_DIRECTORY') | default('/tmp', true) }}/db_password"
+        molecule_db_password: "{{ lookup('password', molecule_db_password_file + ' chars=ascii_letters,digits length=20') }}~a}b#c"
   playbooks:
     converge: ${MOLECULE_PLAYBOOK:-converge.yml}
 # Backup tasks are by design non-idempotent: each run creates a fresh backup

@@ -4,7 +4,6 @@
 
   vars:
     project_sync_db_user: project_sync
-    project_sync_db_password: 'a~b}c-molecule#pw'
 
   tasks:
     - name: Get locally synced file.
@@ -62,7 +61,7 @@
         query: 'SELECT note FROM sync_check'
         login_host: 127.0.0.1
         login_user: '{{ project_sync_db_user }}'
-        login_password: '{{ project_sync_db_password }}'
+        login_password: '{{ molecule_db_password }}'
         login_db: project_sync_target
       register: sync_check_result
 
@@ -78,7 +77,7 @@
         query: "SELECT to_regclass('public.pre_marker') IS NOT NULL AS present"
         login_host: 127.0.0.1
         login_user: '{{ project_sync_db_user }}'
-        login_password: '{{ project_sync_db_password }}'
+        login_password: '{{ molecule_db_password }}'
         login_db: project_sync_target
       register: pre_marker_result
 
