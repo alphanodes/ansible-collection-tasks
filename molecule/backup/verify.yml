@@ -1,0 +1,85 @@
+---
+- name: Verify
+  hosts: all
+
+  vars:
+    backup_dir: /srv/backups
+
+  tasks:
+    - name: Find file backups.
+      ansible.builtin.find:
+        paths: '{{ backup_dir }}'
+        patterns: '{{ item }}-*.tar.gz'
+      register: file_backups
+      loop:
+        - etc
+        - root
+
+    - name: Verify a backup was created for every backup set.
+      ansible.builtin.assert:
+        that: item.files | length > 0
+        fail_msg: 'no backup file found for {{ item.item }}'
+      loop: '{{ file_backups.results }}'
+      loop_control:
+        label: '{{ item.item }}'
+
+    - name: Find database dumps.
+      ansible.builtin.find:
+        paths: '{{ backup_dir }}'
+        patterns: 'db-{{ item }}-*.pg_dump'
+      register: db_dumps
+      loop:
+        - molecule_socket
+        - molecule_tcp
+
+    - name: Verify both database dumps were created.
+      ansible.builtin.assert:
+        that:
+          - item.files | length == 1
+          - item.files[0].size > 0
+        fail_msg: 'expected exactly one non empty dump for {{ item.item }}, found {{ item.files | length }}'
+      loop: '{{ db_dumps.results }}'
+      loop_control:
+        label: '{{ item.item }}'
+
+    - name: Read the table of contents of the dumps.
+      ansible.builtin.command: pg_restore --list {{ item.files[0].path }}
+      register: dump_toc
+      changed_when: false
+      loop: '{{ db_dumps.results }}'
+      loop_control:
+        label: '{{ item.item }}'
+
+    - name: Verify the dumps are valid custom format archives with the table in it.
+      ansible.builtin.assert:
+        that: "'backup_check' in item.stdout"
+        fail_msg: 'dump of {{ item.item.item }} does not contain table backup_check'
+      loop: '{{ dump_toc.results }}'
+      loop_control:
+        label: '{{ item.item.item }}'
+
+    - name: Get checksum of the dumps.
+      ansible.builtin.stat:
+        path: '{{ item.files[0].path }}'
+        get_checksum: true
+        checksum_algorithm: sha256
+      register: dump_stat
+      loop: '{{ db_dumps.results }}'
+      loop_control:
+        label: '{{ item.item }}'
+
+    - name: Read the hash files.
+      ansible.builtin.slurp:
+        src: '{{ item.files[0].path }}.sha256'
+      register: dump_hashfile
+      loop: '{{ db_dumps.results }}'
+      loop_control:
+        label: '{{ item.item }}'
+
+    - name: Verify the hash files match the dumps.
+      ansible.builtin.assert:
+        that: item.0.content | b64decode | trim == item.1.stat.checksum
+        fail_msg: 'hash file does not match the dump of {{ item.1.item.item }}'
+      loop: '{{ dump_hashfile.results | zip(dump_stat.results) | list }}'
+      loop_control:
+        label: '{{ item.1.item.item }}'

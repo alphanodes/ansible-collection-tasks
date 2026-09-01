@@ -3,13 +3,97 @@
   hosts: all
 
   vars:
+    backup_db_user: molecule
+    backup_db_password: 'a~b}c-molecule#pw'
+    backup_test_queries:
+      - 'DROP TABLE IF EXISTS backup_check'
+      - 'CREATE TABLE backup_check (note text)'
+      - "INSERT INTO backup_check (note) VALUES ('backed up')"
     backup_create_hashfiles: true
     backup_one_per_day_limit: false
+    # the dump is written as backup_postgresql_file_owner, so that user needs
+    # write access to backup_dir - the defaults (root:root 0755) do not give it
+    backup_dir_group: postgres
+    backup_dir_mode: '0770'
     backup_sets:
       - name: etc
         src: /etc
       - name: root
         src: /root
 
-  roles:
-    - role: alphanodes.tasks.backup
+  pre_tasks:
+    - name: Update apt cache.
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 600
+      changed_when: false
+
+    - name: Install test dependencies.
+      ansible.builtin.apt:
+        name:
+          - postgresql
+          - python3-psycopg2
+        state: present
+
+    - name: Be sure postgresql is running.
+      ansible.builtin.service:
+        name: postgresql
+        state: started
+
+    - name: Create database user.
+      community.postgresql.postgresql_user:
+        name: '{{ backup_db_user }}'
+        password: '{{ backup_db_password }}'
+      become: true
+      become_user: postgres
+
+    - name: Create databases.
+      community.postgresql.postgresql_db:
+        name: '{{ item }}'
+        owner: '{{ backup_db_user }}'
+        state: present
+      become: true
+      become_user: postgres
+      loop:
+        - molecule_socket
+        - molecule_tcp
+
+    # the tables have to belong to the user that creates the dump later on,
+    # otherwise pg_dump cannot lock them
+    - name: Fill database used over the unix socket.
+      community.postgresql.postgresql_query:
+        query: '{{ item }}'
+        login_db: molecule_socket
+      become: true
+      become_user: postgres
+      loop: '{{ backup_test_queries }}'
+
+    - name: Fill database used over tcp.
+      community.postgresql.postgresql_query:
+        query: '{{ item }}'
+        login_host: 127.0.0.1
+        login_user: '{{ backup_db_user }}'
+        login_password: '{{ backup_db_password }}'
+        login_db: molecule_tcp
+      loop: '{{ backup_test_queries }}'
+
+  tasks:
+    - name: Backup files and a database over the local unix socket.
+      ansible.builtin.include_role:
+        name: alphanodes.tasks.backup
+      vars:
+        backup_with_postgresql: true
+        backup_postgresql_db: molecule_socket
+
+    # covers the tcp connection path used for managed databases (e.g. Google
+    # Cloud SQL), where login host, port, user and password are given
+    - name: Backup a database over tcp.
+      ansible.builtin.include_role:
+        name: alphanodes.tasks.backup
+      vars:
+        backup_with_postgresql: true
+        backup_postgresql_db: molecule_tcp
+        backup_postgresql_host: 127.0.0.1
+        backup_postgresql_port: 5432
+        backup_postgresql_user: '{{ backup_db_user }}'
+        backup_postgresql_password: '{{ backup_db_password }}'

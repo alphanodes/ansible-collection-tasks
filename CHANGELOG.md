@@ -6,6 +6,10 @@
   with `db_source_login_*`, `db_target_login_*` and `db_become_user`
 - project_sync: molecule scenario covers the local and remote sync paths with a
   second container as sync source
+- backup: use `login_port` instead of the deprecated `port` alias, which is
+  removed in community.postgresql 5.0.0
+- backup: molecule scenario covers the PostgreSQL dumps over unix socket and
+  over tcp and verifies the created backups
 
 ## 1.0.1
 
