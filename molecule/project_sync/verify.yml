@@ -1,0 +1,88 @@
+---
+- name: Verify
+  hosts: instance
+
+  vars:
+    project_sync_db_user: project_sync
+    project_sync_db_password: 'a~b}c-molecule#pw'
+
+  tasks:
+    - name: Get locally synced file.
+      ansible.builtin.stat:
+        path: /tmp/etc/hostname
+      register: local_synced_file
+
+    - name: Verify local file sync.
+      ansible.builtin.assert:
+        that: local_synced_file.stat.exists
+        fail_msg: '/tmp/etc/hostname is missing, local file sync did not run'
+
+    - name: Read remotely synced file.
+      ansible.builtin.slurp:
+        src: /srv/sync_files/marker.txt
+      register: remote_synced_file
+
+    - name: Verify remote file sync over ssh.
+      ansible.builtin.assert:
+        that: remote_synced_file.content | b64decode == 'from source'
+        fail_msg: 'marker.txt does not contain the content of the source host'
+
+    - name: Read table synced over the local unix socket.
+      community.postgresql.postgresql_query:
+        query: 'SELECT note FROM sync_check'
+        login_db: project_sync_target_local
+      become: true
+      become_user: postgres
+      register: local_socket_result
+
+    - name: Verify local socket sync.
+      ansible.builtin.assert:
+        that:
+          - local_socket_result.query_result | length == 1
+          - local_socket_result.query_result[0].note == 'from local source'
+        fail_msg: 'local socket sync did not restore the source data'
+
+    - name: Read table synced from the remote unix socket.
+      community.postgresql.postgresql_query:
+        query: 'SELECT note FROM sync_check'
+        login_db: project_sync_target_remote
+      become: true
+      become_user: postgres
+      register: remote_socket_result
+
+    - name: Verify remote socket sync.
+      ansible.builtin.assert:
+        that:
+          - remote_socket_result.query_result | length == 1
+          - remote_socket_result.query_result[0].note == 'from source'
+        fail_msg: 'remote socket sync did not restore the source data'
+
+    - name: Read synced table.
+      community.postgresql.postgresql_query:
+        query: 'SELECT note FROM sync_check'
+        login_host: 127.0.0.1
+        login_user: '{{ project_sync_db_user }}'
+        login_password: '{{ project_sync_db_password }}'
+        login_db: project_sync_target
+      register: sync_check_result
+
+    - name: Verify database dump was restored and post sql commands did run.
+      ansible.builtin.assert:
+        that:
+          - sync_check_result.query_result | length == 1
+          - sync_check_result.query_result[0].note == 'post sql command'
+        fail_msg: 'expected one row with note "post sql command", got {{ sync_check_result.query_result }}'
+
+    - name: Read table created by pre sql commands.
+      community.postgresql.postgresql_query:
+        query: "SELECT to_regclass('public.pre_marker') IS NOT NULL AS present"
+        login_host: 127.0.0.1
+        login_user: '{{ project_sync_db_user }}'
+        login_password: '{{ project_sync_db_password }}'
+        login_db: project_sync_target
+      register: pre_marker_result
+
+    - name: Verify pre sql commands did run.
+      ansible.builtin.assert:
+        that: pre_marker_result.query_result[0].present
+        fail_msg: 'table pre_marker is missing, pre sql commands did not run'

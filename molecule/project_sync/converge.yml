@@ -1,25 +1,176 @@
 ---
-- name: Converge
+- name: Prepare all hosts
   hosts: all
 
-  pre_tasks:
+  vars:
+    project_sync_db_user: project_sync
+    project_sync_db_password: 'a~b}c-molecule#pw'
+
+  tasks:
     - name: Update apt cache.
       ansible.builtin.apt:
         update_cache: true
         cache_valid_time: 600
       changed_when: false
 
-    - name: Install rsync.
+    - name: Install test dependencies.
       ansible.builtin.apt:
-        name: rsync
+        name:
+          - openssh-server
+          - postgresql
+          - python3-psycopg2
+          - rsync
         state: present
 
+    - name: Be sure postgresql is running.
+      ansible.builtin.service:
+        name: postgresql
+        state: started
+
+    - name: Be sure ssh is running.
+      ansible.builtin.service:
+        name: ssh
+        state: started
+
+    - name: Create database user.
+      community.postgresql.postgresql_user:
+        name: '{{ project_sync_db_user }}'
+        password: '{{ project_sync_db_password }}'
+        role_attr_flags: CREATEDB
+      become: true
+      become_user: postgres
+
+- name: Prepare target host
+  hosts: instance
+
+  tasks:
+    - name: Create local source database.
+      community.postgresql.postgresql_db:
+        name: project_sync_src_local
+        state: present
+      become: true
+      become_user: postgres
+
+    - name: Fill local source database over unix socket.
+      community.postgresql.postgresql_query:
+        query: '{{ item }}'
+        login_db: project_sync_src_local
+      become: true
+      become_user: postgres
+      loop:
+        - 'DROP TABLE IF EXISTS sync_check'
+        - 'CREATE TABLE sync_check (note text)'
+        - "INSERT INTO sync_check (note) VALUES ('from local source')"
+
+    - name: Create ssh key for the source host.
+      ansible.builtin.command: ssh-keygen -q -t ed25519 -N '' -f /root/.ssh/id_ed25519
+      args:
+        creates: /root/.ssh/id_ed25519
+
+    - name: Read public ssh key.
+      ansible.builtin.slurp:
+        src: /root/.ssh/id_ed25519.pub
+      register: sync_ssh_key
+
+- name: Prepare source host
+  hosts: source-instance
+
   vars:
-    project_sync_instance_name: etc-mirror-test
+    project_sync_db_user: project_sync
+    project_sync_db_password: 'a~b}c-molecule#pw'
+
+  tasks:
+    - name: Allow the target host to log in.
+      ansible.builtin.copy:
+        content: "{{ hostvars['instance'].sync_ssh_key.content | b64decode }}"
+        dest: /root/.ssh/authorized_keys
+        mode: '0600'
+
+    - name: Create source database.
+      community.postgresql.postgresql_db:
+        name: project_sync_src
+        owner: '{{ project_sync_db_user }}'
+        state: present
+      become: true
+      become_user: postgres
+
+    - name: Fill source database over tcp.
+      community.postgresql.postgresql_query:
+        query: '{{ item }}'
+        login_host: 127.0.0.1
+        login_user: '{{ project_sync_db_user }}'
+        login_password: '{{ project_sync_db_password }}'
+        login_db: project_sync_src
+      loop:
+        - 'DROP TABLE IF EXISTS sync_check'
+        - 'CREATE TABLE sync_check (note text)'
+        - "INSERT INTO sync_check (note) VALUES ('from source')"
+
+    - name: Create directory for the file sync.
+      ansible.builtin.file:
+        path: /srv/sync_files
+        state: directory
+        mode: '0755'
+
+    - name: Create file for the file sync.
+      ansible.builtin.copy:
+        content: 'from source'
+        dest: /srv/sync_files/marker.txt
+        mode: '0644'
+
+- name: Converge
+  hosts: instance
+
+  vars:
+    project_sync_db_user: project_sync
+    project_sync_db_password: 'a~b}c-molecule#pw'
+    project_sync_ssh_options: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
     project_sync_instances:
+      # local file sync without database
       - name: etc-mirror-test
         src_dir: /etc
         target_parent_dir: /tmp
+      # local database sync over the unix socket as the postgres system user
+      - name: db-local-socket-test
+        db_type: postgresql
+        db_source_name: project_sync_src_local
+        db_target_name: project_sync_target_local
+        db_target_owner: postgres
+      # remote database sync where the source host has a local postgres system user
+      - name: db-remote-socket-test
+        src_host: root@source-instance
+        ssh_source_options: '{{ project_sync_ssh_options }}'
+        scp_source_options: '{{ project_sync_ssh_options }}'
+        db_type: postgresql
+        db_source_name: project_sync_src
+        db_target_name: project_sync_target_remote
+        db_target_owner: postgres
+      # remote sync over ssh with a database that only listens on tcp, as it is
+      # the case for managed databases (e.g. Google Cloud SQL), where the source
+      # host has no local postgres system user
+      - name: db-over-tcp-test
+        src_host: root@source-instance
+        src_dir: /srv/sync_files
+        target_parent_dir: /srv
+        ssh_source_options: '{{ project_sync_ssh_options }}'
+        scp_source_options: '{{ project_sync_ssh_options }}'
+        db_type: postgresql
+        db_source_name: project_sync_src
+        db_target_name: project_sync_target
+        db_target_owner: '{{ project_sync_db_user }}'
+        db_become_user: ''
+        db_source_login_host: 127.0.0.1
+        db_source_login_port: 5432
+        db_source_login_user: '{{ project_sync_db_user }}'
+        db_source_login_password: '{{ project_sync_db_password }}'
+        db_target_login_host: 127.0.0.1
+        db_target_login_port: 5432
+        db_target_login_user: '{{ project_sync_db_user }}'
+        db_target_login_password: '{{ project_sync_db_password }}'
+        pre_sql_commands:
+          - 'CREATE TABLE pre_marker (note text)'
+        post_sql_commands:
+          - "UPDATE sync_check SET note = 'post sql command'"
 
   roles:
     - role: alphanodes.tasks.project_sync

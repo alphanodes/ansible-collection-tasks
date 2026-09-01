@@ -8,6 +8,18 @@
 #     db_source_name: store
 #     db_target_name: store
 #     db_target_owner: store
+#     # connection settings for managed databases (e.g. Google Cloud SQL), where
+#     # no local postgres system user exists. Source settings are used on src_host,
+#     # target settings on the host this role runs on.
+#     db_become_user: ''
+#     db_source_login_host: 10.0.0.4
+#     db_source_login_port: 5432
+#     db_source_login_user: store
+#     db_source_login_password: secret
+#     db_target_login_host: 10.0.1.4
+#     db_target_login_port: 5432
+#     db_target_login_user: store
+#     db_target_login_password: secret
 #     pre_commands: []
 #     pre_drush_commands: []
 #     post_commands: []
@@ -26,6 +38,11 @@ project_sync_mysql_quick: true
 # -Fc (custom format is not supported by restore!)
 project_sync_postgresql_dump_options: '--no-owner'
 project_sync_postgresql_restore_options: '-n public'
+
+# system user to become for local postgresql commands. Managed databases
+# (e.g. Google Cloud SQL) have no local postgres user - set this or the per
+# instance db_become_user to an empty string to run without become there.
+project_sync_postgresql_become_user: postgres
 
 project_sync_remote_rsync_options: '-avz --delete'
 project_sync_local_rsync_options: '-av --delete'

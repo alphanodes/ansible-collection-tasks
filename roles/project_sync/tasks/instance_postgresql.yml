@@ -1,13 +1,22 @@
 ---
-- name: Set tmp file for dump
+- name: Set PostgreSQL facts - {{ instance.name }}
   ansible.builtin.set_fact:
     tmp_postgres_dump_file: "{{ project_sync_tmp_dir }}/_postgresql_{{ date_stamp }}.dump"
+    postgres_become_user: "{{ instance.db_become_user | default(project_sync_postgresql_become_user) | string }}"
+    postgres_source_login_host: "{{ instance.db_source_login_host | default('') | string }}"
+    postgres_source_login_port: "{{ instance.db_source_login_port | default('') | string }}"
+    postgres_source_login_user: "{{ instance.db_source_login_user | default('') | string }}"
+    # db_source_host and db_source_port are the former names of the target login settings
+    postgres_target_login_host: "{{ instance.db_target_login_host | default(instance.db_source_host | default('')) | string }}"
+    postgres_target_login_port: "{{ instance.db_target_login_port | default(instance.db_source_port | default('')) | string }}"
+    postgres_target_login_user: "{{ instance.db_target_login_user | default(instance.db_target_owner | default('')) | string }}"
 
 - name: Check if hostname is defined
   ansible.builtin.fail:
     msg: 'if no host name is defined, db_source_name and db_target_name has to be different.'
   when:
     - source_host | length == 0
+    - postgres_source_login_host == postgres_target_login_host
     - instance.db_source_name == instance.db_target_name
 
 # see https://docs.ansible.com/ansible/latest/collections/community/postgresql/postgresql_db_module.html
@@ -16,9 +25,13 @@
     name: '{{ instance.db_source_name }}'
     target: '{{ tmp_postgres_dump_file }}'
     dump_extra_args: '{{ project_sync_postgresql_dump_options }}'
+    login_host: "{{ postgres_source_login_host if postgres_source_login_host | length > 0 else omit }}"
+    login_user: "{{ postgres_source_login_user if postgres_source_login_user | length > 0 else omit }}"
+    login_password: "{{ instance.db_source_login_password | default(omit) }}"
+    login_port: "{{ postgres_source_login_port if postgres_source_login_port | length > 0 else omit }}"
     state: dump
-  become_user: postgres
-  become: true
+  become_user: "{{ postgres_become_user if postgres_become_user | length > 0 else omit }}"
+  become: '{{ postgres_become_user | length > 0 }}'
   when: source_host | length == 0
 
 - name: Create postgresql database dump on remote host - {{ instance.name }}
@@ -26,7 +39,28 @@
     ssh {{ ssh_source_options + ' ' if ssh_source_options != '' else '' }}{{ source_host }}
     'su -l postgres -c "pg_dump {{ project_sync_postgresql_dump_options }}
     {{ instance.db_source_name }} > {{ tmp_postgres_dump_file }}"'
-  when: source_host | length > 0
+  when:
+    - source_host | length > 0
+    - postgres_source_login_host | length == 0
+
+# managed databases (e.g. Google Cloud SQL) have no local postgres system user on
+# the source host, so pg_dump has to connect over tcp. The password is piped in via
+# stdin to keep it out of the process list and to stay quoting safe.
+- name: Create postgresql database dump on remote host over tcp - {{ instance.name }}
+  ansible.builtin.shell:
+    cmd: >
+      ssh {{ ssh_source_options + ' ' if ssh_source_options != '' else '' }}{{ source_host }}
+      'PGPASSWORD="$(cat)" pg_dump {{ project_sync_postgresql_dump_options }}
+      -h {{ postgres_source_login_host }}
+      {{ '-p ' + postgres_source_login_port if postgres_source_login_port | length > 0 else '' }}
+      {{ '-U ' + postgres_source_login_user if postgres_source_login_user | length > 0 else '' }}
+      {{ instance.db_source_name }} > {{ tmp_postgres_dump_file }}'
+    stdin: '{{ instance.db_source_login_password | default("") }}'
+    stdin_add_newline: false
+  no_log: true
+  when:
+    - source_host | length > 0
+    - postgres_source_login_host | length > 0
 
 - name: Transfer database dump to host - {{ instance.name }}
   ansible.builtin.command: >
@@ -39,10 +73,14 @@
   when: source_host | length > 0
 
 - name: Drop database - {{ instance.name }}
-  become_user: postgres
-  become: true
+  become_user: "{{ postgres_become_user if postgres_become_user | length > 0 else omit }}"
+  become: '{{ postgres_become_user | length > 0 }}'
   community.postgresql.postgresql_db:
     name: '{{ instance.db_target_name }}'
+    login_host: "{{ postgres_target_login_host if postgres_target_login_host | length > 0 else omit }}"
+    login_user: "{{ postgres_target_login_user if postgres_target_login_user | length > 0 else omit }}"
+    login_password: "{{ instance.db_target_login_password | default(omit) }}"
+    login_port: "{{ postgres_target_login_port if postgres_target_login_port | length > 0 else omit }}"
     state: absent
   when: project_sync_recreate_db
 
@@ -54,34 +92,41 @@
     - instance.db_target_owner is undefined
 
 - name: Create database - {{ instance.name }}
-  become_user: postgres
-  become: true
+  become_user: "{{ postgres_become_user if postgres_become_user | length > 0 else omit }}"
+  become: '{{ postgres_become_user | length > 0 }}'
   community.postgresql.postgresql_db:
     name: '{{ instance.db_target_name }}'
     owner: '{{ instance.db_target_owner }}'
+    login_host: "{{ postgres_target_login_host if postgres_target_login_host | length > 0 else omit }}"
+    login_user: "{{ postgres_target_login_user if postgres_target_login_user | length > 0 else omit }}"
+    login_password: "{{ instance.db_target_login_password | default(omit) }}"
+    login_port: "{{ postgres_target_login_port if postgres_target_login_port | length > 0 else omit }}"
     state: present
   when: project_sync_recreate_db
 
 - name: Run pre sql commands for PostgreSQL - {{ instance.name }}
-  become_user: postgres
-  become: true
+  become_user: "{{ postgres_become_user if postgres_become_user | length > 0 else omit }}"
+  become: '{{ postgres_become_user | length > 0 }}'
   community.postgresql.postgresql_query:
     query: '{{ item }}'
-    login_host: '{{ instance.db_source_host | default(omit) }}'
-    login_user: '{{ instance.db_target_owner }}'
+    login_host: "{{ postgres_target_login_host if postgres_target_login_host | length > 0 else omit }}"
+    login_user: "{{ postgres_target_login_user if postgres_target_login_user | length > 0 else omit }}"
+    login_password: "{{ instance.db_target_login_password | default(omit) }}"
     login_db: '{{ instance.db_target_name }}'
-    login_port: '{{ instance.db_source_port | default(omit) }}'
+    login_port: "{{ postgres_target_login_port if postgres_target_login_port | length > 0 else omit }}"
   loop: '{{ instance.pre_sql_commands | default([]) }}'
 
 - name: Import database dump - {{ instance.name }}
-  become_user: postgres
-  become: true
+  become_user: "{{ postgres_become_user if postgres_become_user | length > 0 else omit }}"
+  become: '{{ postgres_become_user | length > 0 }}'
   community.postgresql.postgresql_db:
     name: '{{ instance.db_target_name }}'
     target: '{{ tmp_postgres_dump_file }}'
     target_opts: "{{ project_sync_postgresql_restore_options }}"
-    login_host: '{{ instance.db_source_host | default(omit) }}'
-    login_user: '{{ instance.db_target_owner }}'
+    login_host: "{{ postgres_target_login_host if postgres_target_login_host | length > 0 else omit }}"
+    login_user: "{{ postgres_target_login_user if postgres_target_login_user | length > 0 else omit }}"
+    login_password: "{{ instance.db_target_login_password | default(omit) }}"
+    login_port: "{{ postgres_target_login_port if postgres_target_login_port | length > 0 else omit }}"
     owner: '{{ instance.db_target_owner | default(omit) }}'
     state: restore
 
@@ -91,12 +136,13 @@
     state: absent
 
 - name: Run post sql commands for PostgreSQL - {{ instance.name }}
-  become_user: postgres
-  become: true
+  become_user: "{{ postgres_become_user if postgres_become_user | length > 0 else omit }}"
+  become: '{{ postgres_become_user | length > 0 }}'
   community.postgresql.postgresql_query:
     query: '{{ item }}'
-    login_host: '{{ instance.db_source_host | default(omit) }}'
-    login_user: '{{ instance.db_target_owner }}'
+    login_host: "{{ postgres_target_login_host if postgres_target_login_host | length > 0 else omit }}"
+    login_user: "{{ postgres_target_login_user if postgres_target_login_user | length > 0 else omit }}"
+    login_password: "{{ instance.db_target_login_password | default(omit) }}"
     login_db: '{{ instance.db_target_name }}'
-    login_port: '{{ instance.db_source_port | default(omit) }}'
+    login_port: "{{ postgres_target_login_port if postgres_target_login_port | length > 0 else omit }}"
   loop: '{{ instance.post_sql_commands | default([]) }}'
