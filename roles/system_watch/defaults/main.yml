@@ -28,6 +28,20 @@ system_watch_rsync_opts_more: []
 # Additional options for ls, e.g. to ignore files/directories
 system_watch_ls_options: "--ignore='apt' --ignore='letsencrypt'"
 
+# Remove lines from the synced copies of tracked files. Use it for values a
+# service rewrites on its own schedule (renewal caches, timestamps, counters):
+# they are no config change, but they would produce a commit on every run.
+# Keep the path in system_watch_ls_options as well, otherwise the changing
+# mtime still shows up in etc_metadata.txt.
+# e.g.
+# system_watch_strip_lines:
+#   - path: etc/letsencrypt/renewal
+#     patterns: '*.conf'
+#     lines:
+#       - '^\[acme_renewal_info\]$'
+#       - '^ari_retry_after = '
+system_watch_strip_lines: []
+
 # Log status of these git repositories (path to git project)
 # (For drupal_instances and redmine_instances this is done automatically)
 # e.g.

@@ -18,3 +18,24 @@ Installs system-watch monitoring on Debian and Ubuntu servers.
       roles:
         - alphanodes.tasks.system_watch
 ```
+
+## Ignoring volatile lines
+
+Some services rewrite generated values in their config files on their own
+schedule. Those rewrites are no config change, but they still produce a commit
+on every run. `system_watch_strip_lines` removes such lines from the synced
+copies, so the file stays under version control while the noise is gone.
+
+```yaml
+    system_watch_strip_lines:
+      - path: etc/letsencrypt/renewal
+        patterns: '*.conf'
+        lines:
+          - '^\[acme_renewal_info\]$'
+          - '^ari_retry_after = '
+```
+
+`path` is relative to the tracked host directory, `patterns` and `recurse` are
+passed to `find` and default to `*` and `false`. Keep the path in
+`system_watch_ls_options` as well - otherwise the changing mtime of the source
+file still shows up in `etc_metadata.txt`.

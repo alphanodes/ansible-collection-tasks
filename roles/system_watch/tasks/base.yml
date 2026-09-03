@@ -42,6 +42,12 @@
   delegate_to: "{{ inventory_hostname }}"
   register: sync_result
 
+- name: Strip volatile lines from tracked files
+  ansible.builtin.include_tasks: strip_lines.yml
+  loop: '{{ system_watch_strip_lines }}'
+  loop_control:
+    loop_var: strip_item
+
 - name: Log data
   environment:
     GIT_WORK_TREE: '{{ system_watch_dir }}'

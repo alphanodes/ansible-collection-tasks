@@ -1,0 +1,28 @@
+---
+# Drop volatile lines from the synced copies of tracked files.
+#
+# Some services rewrite generated values in their config files on their own
+# schedule (renewal caches, timestamps, counters). Those rewrites are not
+# config changes, but they would still produce a commit on every run. Removing
+# the matching lines here keeps the file itself under version control, so real
+# changes are still visible.
+
+- name: Find tracked files below {{ strip_item.path }}
+  ansible.builtin.find:
+    paths: '{{ system_watch_log_dir }}/{{ strip_item.path }}'
+    patterns: '{{ strip_item.patterns | default("*") }}'
+    recurse: '{{ strip_item.recurse | default(false) }}'
+  register: system_watch_strip_files
+
+# Nothing is changed on the host itself - this only rewrites the log copy, so
+# reporting it as changed on every run would just move the noise into the
+# rollout report.
+- name: Remove volatile lines below {{ strip_item.path }}
+  ansible.builtin.lineinfile:
+    path: '{{ item.0.path }}'
+    regexp: '{{ item.1 }}'
+    state: absent
+  loop: '{{ system_watch_strip_files.files | product(strip_item.lines) | list }}'
+  loop_control:
+    label: '{{ item.0.path }} -> {{ item.1 }}'
+  changed_when: false
