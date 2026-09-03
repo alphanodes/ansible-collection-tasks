@@ -1,0 +1,42 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: true
+
+  vars:
+    tracked_dir: /srv/.log/{{ ansible_hostname }}/etc
+
+  tasks:
+    - name: Check the tracked copy of the certbot renewal config
+      ansible.builtin.stat:
+        path: '{{ tracked_dir }}/letsencrypt/renewal/molecule_test.conf'
+      register: tracked_renewal_config
+
+    - name: Check the renewal config on the host
+      ansible.builtin.stat:
+        path: /etc/letsencrypt/renewal/molecule_test.conf
+      register: host_renewal_config
+
+    - name: Check that other files below /etc are still tracked
+      ansible.builtin.stat:
+        path: '{{ tracked_dir }}/hostname'
+      register: tracked_hostname
+
+    - name: Assert certbot renewal configs are excluded from tracking
+      ansible.builtin.assert:
+        that:
+          - not tracked_renewal_config.stat.exists
+        fail_msg: 'Renewal configs are tracked, so certbot rewrites them into the log'
+
+    # Excluding must only affect the log copy, never the host itself.
+    - name: Assert the renewal config on the host is untouched
+      ansible.builtin.assert:
+        that:
+          - host_renewal_config.stat.exists
+        fail_msg: 'The renewal config was removed from the host'
+
+    - name: Assert the exclude did not stop the sync itself
+      ansible.builtin.assert:
+        that:
+          - tracked_hostname.stat.exists
+        fail_msg: 'Nothing below /etc was synced at all'

@@ -38,6 +38,12 @@
       ansible.builtin.command: git config --global init.defaultBranch "main"
       changed_when: false
 
+    - name: Create certbot renewal directory
+      ansible.builtin.file:
+        path: /etc/letsencrypt/renewal
+        state: directory
+        mode: '0755'
+
     - name: Create test git repo directory
       ansible.builtin.file:
         path: /git_repo
@@ -54,6 +60,19 @@
         git commit -m 'first commit'
       args:
         creates: /git_repo/.git/HEAD
+
+    # certbot rewrites the [acme_renewal_info] block on its own schedule, so
+    # renewal configs are excluded from the sync. Mimic one to verify that.
+    - name: Create a certbot renewal config
+      ansible.builtin.copy:
+        dest: /etc/letsencrypt/renewal/molecule_test.conf
+        mode: '0644'
+        content: |
+          version = 5.7.0
+          [renewalparams]
+          authenticator = dns-hetzner
+          [acme_renewal_info]
+          ari_retry_after = 2026-09-03T10:48:10
 
   vars:
     system_watch_repo: file:///git_repo
