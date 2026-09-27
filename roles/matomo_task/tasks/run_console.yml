@@ -8,6 +8,10 @@
   become: "{{ true if matomo_user is defined else false }}"
   become_user: '{{ matomo_user | default(omit) }}'
   register: console_result
+  # On failure Ansible would print the whole stdout in one line. core:archive
+  # output easily exceeds the journald line limit (48 KB), so the error at its
+  # end got lost. The last task reports the failure compactly instead.
+  failed_when: false
   when:
     - mysql_replication_role is undefined or mysql_replication_role == 'master'
     - sync_master is undefined
@@ -18,3 +22,15 @@
   when:
     - console_result.stdout_lines is defined
     - console_result.stdout_lines | length > 0
+
+- name: Report failure of console - {{ matomo_console_name }}
+  ansible.builtin.fail:
+    msg: "{{ ([console_failure_header] + console_error_lines + ['Last output lines:'] + console_last_lines) | map('truncate', 300, true) | join('\n') }}"
+  vars:
+    console_failure_header: "{{ matomo_console_name }} failed with rc {{ console_result.rc }}"
+    # Matomo prints errors as "ERROR     [date] pid  message" lines
+    console_error_lines: "{{ ((console_result.stdout_lines | select('search', '^(ERROR|CRITICAL|WARNING) ') | list)[-20:]) + console_result.stderr_lines[-10:] }}"
+    console_last_lines: "{{ console_result.stdout_lines[-20:] }}"
+  when:
+    - console_result.rc is defined
+    - console_result.rc != 0

@@ -1,0 +1,68 @@
+---
+# Console tasks are tested here instead of in converge: every run executes
+# the command, so they can never pass the idempotence test.
+- name: Verify
+  hosts: all
+
+  vars:
+    matomo_user: root
+
+  tasks:
+    # There is no PHP in the test container. The fake binary answers
+    # "php console --no-ansi -n <command>" like a Matomo console would.
+    - name: Install fake php for the console tests
+      ansible.builtin.copy:
+        dest: /usr/local/bin/php
+        mode: '0755'
+        content: |
+          #!/bin/bash
+          case "$4" in
+            fake:ok)
+              echo "INFO      done"
+              exit 0
+              ;;
+            fake:fail)
+              for i in $(seq 1 3000); do
+                echo "INFO      [2026-01-01 00:00:00] 1  Archived website id $i, period = day, segment = '', 10 visits found."
+              done
+              echo "ERROR     [2026-01-01 01:00:00] 1  Got invalid response from API request: fake-request"
+              echo "ERROR     [2026-01-01 01:00:01] 1  1 total errors during this script execution, please investigate and try and fix these errors."
+              exit 1
+              ;;
+          esac
+          exit 2
+
+    - name: Run a successful console command
+      ansible.builtin.include_role:
+        name: alphanodes.tasks.matomo_task
+      vars:
+        matomo_console_name: fake:ok
+
+    - name: Run a failing console command
+      block:
+        - name: Run the failing console command
+          ansible.builtin.include_role:
+            name: alphanodes.tasks.matomo_task
+          vars:
+            matomo_console_name: fake:fail
+
+        - name: The failing console command must fail the play
+          ansible.builtin.fail:
+            msg: 'A console command with rc 1 did not fail'
+      rescue:
+        - name: Store the failure of the console command
+          ansible.builtin.set_fact:
+            console_failure: '{{ ansible_failed_result }}'
+
+    # The whole stdout of core:archive easily exceeds the journald line
+    # limit (48 KB), the error at its end got lost in the journal.
+    - name: Verify the failure reports the error lines compactly
+      ansible.builtin.assert:
+        that:
+          - console_failure is defined
+          - "'Got invalid response from API request: fake-request' in console_failure.msg"
+          - "'1 total errors during this script execution' in console_failure.msg"
+          - "'rc 1' in console_failure.msg"
+          - "'Archived website id 1,' not in (console_failure | to_json)"
+          - (console_failure | to_json | length) < 20000
+        fail_msg: "Unexpected failure result: {{ (console_failure | default({}) | to_json)[:2000] }}"
