@@ -13,6 +13,8 @@
 
   vars:
     matomo_user: root
+    # Differs from matomo_user on purpose, the group must not be derived from it
+    matomo_group: www-data
     matomo_task_name: geoip-update
     # Controller is unprivileged in molecule - skip the chown on the local
     # working directory by setting empty values (default(omit, true) handles it).

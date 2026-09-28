@@ -8,6 +8,19 @@
     matomo_user: root
 
   tasks:
+    - name: Get the deployed DBIP database
+      ansible.builtin.stat:
+        path: /srv/matomo/misc/DBIP-City.mmdb
+      register: dbip_file
+
+    - name: Verify the DBIP database has matomo_user and matomo_group
+      ansible.builtin.assert:
+        that:
+          - dbip_file.stat.exists
+          - dbip_file.stat.pw_name == 'root'
+          - dbip_file.stat.gr_name == 'www-data'
+        fail_msg: "Unexpected DBIP database: {{ dbip_file.stat }}"
+
     # There is no PHP in the test container. The fake binary answers
     # "php console --no-ansi -n <command>" like a Matomo console would.
     - name: Install fake php for the console tests

@@ -1,6 +1,9 @@
 ---
 matomo_dir: /srv/matomo
 matomo_user: www-data
+# Group of the deployed files. Not derived from matomo_user, a dedicated
+# matomo user usually has www-data as its group (see the matomo role).
+matomo_group: www-data
 matomo_db_name: matomo
 
 # set url to use

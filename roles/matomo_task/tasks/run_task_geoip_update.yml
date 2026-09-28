@@ -48,7 +48,7 @@
     src: '{{ working_dir }}/{{ matomo_task_geo_source_file }}'
     dest: '{{ matomo_dir }}/misc/{{ matomo_task_geo_target_file }}'
     owner: '{{ matomo_user }}'
-    group: '{{ matomo_user }}'
+    group: '{{ matomo_group }}'
     mode: '0644'
     force: true
   become: "{{ matomo_task_become | default(omit) }}"
