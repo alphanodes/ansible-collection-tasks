@@ -133,9 +133,11 @@ backup_borg_binary: '/usr/local/bin/borg'
 #  - /var
 backup_borg_directories: []
 
-# backup_borg_excludes: []
-#  - 're:^/var/lib/apt'
-#  - 're:^/var/[^/]+\/cache/'
+# borg matches paths without leading slash: sh: removes it from the
+# pattern, re: does not, so 're:^/var' never matches
+# backup_borg_excludes:
+#  - 'sh:/var/lib/apt'
+#  - 're:^var/[^/]+/cache/'
 backup_borg_excludes: []
 
 # ssh://{{ storageboxes.no1.user }}@{{ storageboxes.no1.host }}:23/./backups/server1
