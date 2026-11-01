@@ -1,0 +1,19 @@
+---
+- name: Verify
+  hosts: all
+  gather_facts: false
+
+  tasks:
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+
+    - name: Check git-svn is installed and svn2git is removed
+      ansible.builtin.assert:
+        that:
+          - "'git-svn' in ansible_facts.packages"
+          - "'subversion' in ansible_facts.packages"
+          - "'svn2git' not in ansible_facts.packages"
+
+    - name: Check git svn works
+      ansible.builtin.command: git svn --version
+      changed_when: false

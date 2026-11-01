@@ -11,5 +11,10 @@ git_mirrors: []
 
 git_mirrors_packages:
   - git
+  - git-svn
   - subversion
+
+# Removed, because svn mirrors use git svn and svn2git depends on the
+# distribution ruby, which blocks replacing it with a compiled ruby
+git_mirrors_obsolete_packages:
   - svn2git

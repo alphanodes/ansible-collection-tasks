@@ -5,6 +5,11 @@
     name: '{{ git_mirrors_packages }}'
     state: present
 
+- name: Be sure obsolete packages are removed
+  ansible.builtin.apt:
+    name: '{{ git_mirrors_obsolete_packages }}'
+    state: absent
+
 - name: Create root directory for mirrors
   ansible.builtin.file:
     path: '{{ git_mirrors_root }}'

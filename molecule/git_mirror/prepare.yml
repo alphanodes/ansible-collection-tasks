@@ -1,0 +1,15 @@
+---
+- name: Prepare
+  hosts: all
+
+  tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 600
+
+    # Existing installations got svn2git from older role versions
+    - name: Install svn2git like older role versions
+      ansible.builtin.apt:
+        name: svn2git
+        state: present
