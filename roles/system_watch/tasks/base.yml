@@ -76,6 +76,8 @@
 
     # /etc/nftables.conf only shows what should be loaded, this shows what is
     # active. Counters (-s) and set contents (-t) are omitted to avoid noise.
+    # Without active rules the file is removed, so hosts without a firewall
+    # do not carry an empty file and a removed firewall shows up in the log.
     - name: Create list of active nftables rules
       ansible.builtin.shell: >
         set -o pipefail &&
@@ -83,7 +85,9 @@
         { grep -vE '{{ system_watch_nft_exclude_tables | join("|") }}' || true; } |
         while read -r _ family name; do
         nft -s -t list table "$family" "$name" 2>/dev/null || true;
-        done > {{ system_watch_log_dir }}/nftables_rules.txt
+        done > {{ system_watch_log_dir }}/nftables_rules.txt;
+        [ -s {{ system_watch_log_dir }}/nftables_rules.txt ] ||
+        rm -f {{ system_watch_log_dir }}/nftables_rules.txt
       args:
         executable: /bin/bash
       changed_when: false

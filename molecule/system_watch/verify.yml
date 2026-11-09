@@ -58,3 +58,31 @@
         that:
           - tracked_hostname.stat.exists
         fail_msg: 'Nothing below /etc was synced at all'
+
+    # Has to stay at the end, because it changes the state the checks above use.
+    - name: Remove all active nftables rules
+      ansible.builtin.command: nft flush ruleset
+      changed_when: false
+
+    - name: Run system_watch again without active nftables rules
+      ansible.builtin.include_role:
+        name: alphanodes.tasks.system_watch
+      vars:
+        system_watch_repo: file:///git_repo
+
+    - name: Check the logged nftables rules without active rules
+      ansible.builtin.stat:
+        path: /srv/.log/{{ ansible_hostname }}/nftables_rules.txt
+      register: nftables_rules_without_rules
+
+    - name: Check if git still tracks the logged nftables rules
+      ansible.builtin.command: git -C /srv/.log ls-files {{ ansible_hostname }}/nftables_rules.txt
+      register: nftables_rules_tracked
+      changed_when: false
+
+    - name: Assert nftables_rules.txt is gone without active rules
+      ansible.builtin.assert:
+        that:
+          - not nftables_rules_without_rules.stat.exists
+          - nftables_rules_tracked.stdout | length == 0
+        fail_msg: 'nftables_rules.txt still exists or is still tracked without active rules'
