@@ -13,8 +13,39 @@
       ansible.builtin.apt:
         name:
           - git
+          - nftables
           - rsync
         state: present
+
+    # One table that has to be logged, with a counter and set contents that
+    # must not show up, and one fail2ban table that has to be left out.
+    - name: Create nftables test config
+      ansible.builtin.copy:
+        dest: /root/molecule_nftables.conf
+        mode: '0600'
+        content: |
+          table inet molecule_test
+          delete table inet molecule_test
+          table inet molecule_test {
+            set molecule_set {
+              type ipv4_addr
+              elements = { 192.0.2.1 }
+            }
+            chain input {
+              tcp dport 2222 counter accept
+            }
+          }
+          table inet f2b-table
+          delete table inet f2b-table
+          table inet f2b-table {
+            chain f2b-chain {
+              tcp dport 2223 accept
+            }
+          }
+
+    - name: Load nftables test config
+      ansible.builtin.command: nft -f /root/molecule_nftables.conf
+      changed_when: false
 
     # The role uses 'set -o pipefail' in shell tasks. /bin/sh is dash on
     # Debian containers, which does not support pipefail. Production servers

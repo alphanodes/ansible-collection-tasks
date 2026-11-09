@@ -22,6 +22,24 @@
         path: '{{ tracked_dir }}/hostname'
       register: tracked_hostname
 
+    - name: Read the logged nftables rules
+      ansible.builtin.slurp:
+        src: /srv/.log/{{ ansible_hostname }}/nftables_rules.txt
+      register: nftables_rules_file
+
+    - name: Assert active nftables rules are logged without volatile content
+      vars:
+        nftables_rules: "{{ nftables_rules_file.content | b64decode }}"
+      ansible.builtin.assert:
+        that:
+          - "'table inet molecule_test' in nftables_rules"
+          - "'tcp dport 2222' in nftables_rules"
+          - "'counter packets' not in nftables_rules"
+          - "'192.0.2.1' not in nftables_rules"
+          - "'f2b-table' not in nftables_rules"
+          - "'tcp dport 2223' not in nftables_rules"
+        fail_msg: 'nftables_rules.txt misses active rules or contains volatile content'
+
     - name: Assert certbot renewal configs are excluded from tracking
       ansible.builtin.assert:
         that:

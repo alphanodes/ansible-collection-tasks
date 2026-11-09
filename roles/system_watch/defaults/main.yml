@@ -32,6 +32,12 @@ system_watch_rsync_opts_more: []
 # Additional options for ls, e.g. to ignore files/directories
 system_watch_ls_options: "--ignore='apt' --ignore='letsencrypt'"
 
+# Tables (family and name) left out of nftables_rules.txt, because they change
+# without a config change. fail2ban creates its table with the first ban. Add
+# the iptables-nft tables on Docker hosts, e.g. 'ip nat' and 'ip filter'.
+system_watch_nft_exclude_tables:
+  - 'inet f2b-table'
+
 # Log status of these git repositories (path to git project)
 # (For drupal_instances and redmine_instances this is done automatically)
 # e.g.
