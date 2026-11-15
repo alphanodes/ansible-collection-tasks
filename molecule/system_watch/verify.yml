@@ -36,6 +36,8 @@
           - "'tcp dport 2222' in nftables_rules"
           - "'counter packets' not in nftables_rules"
           - "'192.0.2.1' not in nftables_rules"
+          - "'size 65535' in nftables_rules"
+          - "'# count' not in nftables_rules"
           - "'f2b-table' not in nftables_rules"
           - "'tcp dport 2223' not in nftables_rules"
         fail_msg: 'nftables_rules.txt misses active rules or contains volatile content'

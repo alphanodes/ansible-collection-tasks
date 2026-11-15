@@ -17,8 +17,9 @@
           - rsync
         state: present
 
-    # One table that has to be logged, with a counter and set contents that
-    # must not show up, and one fail2ban table that has to be left out.
+    # One table that has to be logged, with a counter, set contents and the
+    # element count of a set with a size that must not show up, and one
+    # fail2ban table that has to be left out.
     - name: Create nftables test config
       ansible.builtin.copy:
         dest: /root/molecule_nftables.conf
@@ -29,6 +30,9 @@
           table inet molecule_test {
             set molecule_set {
               type ipv4_addr
+              size 65535
+              flags dynamic,timeout
+              timeout 10m
               elements = { 192.0.2.1 }
             }
             chain input {
