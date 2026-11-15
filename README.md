@@ -20,7 +20,7 @@ This collection provides tasks for:
 
 - Linux operating systems:
   - Debian 13
-  - Ubuntu 24.04/26.04
+  - Ubuntu 26.04
 
 ## Minimum required Ansible-version
 

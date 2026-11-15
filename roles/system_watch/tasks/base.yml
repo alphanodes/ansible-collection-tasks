@@ -76,10 +76,13 @@
 
     # /etc/nftables.conf only shows what should be loaded, this shows what is
     # active. Counters (-s) and set contents (-t) are omitted to avoid noise.
-    # -t still prints the element count of sets with a size ('# count 4'),
-    # which changes with every dynamic entry, so sed strips it.
+    # Newer nft versions (1.1.6 on Ubuntu 26.04) still print the element count
+    # of sets with a size ('# count 4') with -t, which changes with every
+    # dynamic entry, so sed strips it.
     # Without active rules the file is removed, so hosts without a firewall
     # do not carry an empty file and a removed firewall shows up in the log.
+    # The removal only runs after the dump succeeded, so a failing dump (e.g. a
+    # missing log directory) fails the task.
     - name: Create list of active nftables rules
       ansible.builtin.shell: >
         set -o pipefail &&
@@ -88,9 +91,9 @@
         while read -r _ family name; do
         nft -s -t list table "$family" "$name" 2>/dev/null || true;
         done |
-        sed -E 's/[[:space:]]*# count [0-9]+$//' > {{ system_watch_log_dir }}/nftables_rules.txt;
-        [ -s {{ system_watch_log_dir }}/nftables_rules.txt ] ||
-        rm -f {{ system_watch_log_dir }}/nftables_rules.txt
+        sed -E 's/[[:space:]]*# count [0-9]+$//' > {{ system_watch_log_dir }}/nftables_rules.txt &&
+        { [ -s {{ system_watch_log_dir }}/nftables_rules.txt ] ||
+        rm -f {{ system_watch_log_dir }}/nftables_rules.txt; }
       args:
         executable: /bin/bash
       changed_when: false
