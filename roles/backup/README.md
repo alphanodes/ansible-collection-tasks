@@ -20,10 +20,10 @@ Directory for backups. Make sure there is enough disk space at this disk partiti
 Use quotes to make sure there are no converting problem (e.g. with to_nice_yaml)
 
 ```yaml
-backup_dir_mode: '0755'
+backup_dir_mode: "{{ '0770' if backup_with_postgresql | bool else '0700' }}"
 ```
 
-Directory permission for `backup_dir`
+Directory permission for `backup_dir`. With PostgreSQL the dump user writes through the group, otherwise only root has access. Override it only for additional readers, e.g. nginx serving the backups.
 
 ```yaml
 backup_dir_owner: root
@@ -32,10 +32,10 @@ backup_dir_owner: root
 Directory owner for `backup_dir`
 
 ```yaml
-backup_dir_group: root
+backup_dir_group: "{{ backup_postgresql_file_owner if backup_with_postgresql | bool else 'root' }}"
 ```
 
-Directory group for `backup_dir`
+Directory group for `backup_dir`, the user writing the PostgreSQL dumps if `backup_with_postgresql` is set
 
 ```yaml
 backup_max_days: 7
@@ -227,8 +227,6 @@ List of commands, which runs after backup dump has been created.
     backup_max_weeks: 4
     backup_max_months: 6
     backup_with_postgresql: true
-    backup_dir_mode: '0770'
-    backup_dir_group: postgres
     backup_sets:
       - name: etc
         src: /etc

@@ -6,6 +6,23 @@
     backup_dir: /srv/backups
 
   tasks:
+    # derived from backup_with_postgresql: postgres writes the dumps through
+    # the group, nobody else has access
+    - name: Stat the backup directory.
+      ansible.builtin.stat:
+        path: '{{ backup_dir }}'
+      register: backup_dir_stat
+
+    - name: Verify owner, group and mode of the backup directory.
+      ansible.builtin.assert:
+        that:
+          - backup_dir_stat.stat.pw_name == 'root'
+          - backup_dir_stat.stat.gr_name == 'postgres'
+          - backup_dir_stat.stat.mode == '0770'
+        fail_msg: >-
+          {{ backup_dir }} is {{ backup_dir_stat.stat.pw_name }}:{{ backup_dir_stat.stat.gr_name }}
+          {{ backup_dir_stat.stat.mode }}, expected root:postgres 0770
+
     - name: Find file backups.
       ansible.builtin.find:
         paths: '{{ backup_dir }}'

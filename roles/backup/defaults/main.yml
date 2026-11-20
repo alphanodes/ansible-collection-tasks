@@ -2,9 +2,13 @@
 # defaults file for backup
 
 backup_dir: /srv/backups
-backup_dir_mode: '0755'
+# PostgreSQL dumps are written as backup_postgresql_file_owner, which gets
+# write access through the group. Without PostgreSQL only root writes, so
+# nobody else needs any access. Override owner, group and mode only for extra
+# readers, e.g. nginx serving the backups for download.
+backup_dir_mode: "{{ '0770' if backup_with_postgresql | bool else '0700' }}"
 backup_dir_owner: root
-backup_dir_group: root
+backup_dir_group: "{{ backup_postgresql_file_owner if backup_with_postgresql | bool else 'root' }}"
 
 # Amount of days for daily backup sets. >=1 days are supported
 backup_max_days: 3

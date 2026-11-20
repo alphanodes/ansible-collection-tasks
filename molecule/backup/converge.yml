@@ -10,10 +10,6 @@
       - "INSERT INTO backup_check (note) VALUES ('backed up')"
     backup_create_hashfiles: true
     backup_one_per_day_limit: false
-    # the dump is written as backup_postgresql_file_owner, so that user needs
-    # write access to backup_dir - the defaults (root:root 0755) do not give it
-    backup_dir_group: postgres
-    backup_dir_mode: '0770'
     backup_sets:
       - name: etc
         src: /etc
