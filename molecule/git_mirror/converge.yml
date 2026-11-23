@@ -14,5 +14,11 @@
         name: git
         state: present
 
+  vars:
+    git_mirrors:
+      - name: test
+        repo: /srv/upstream
+        push_to: /srv/target.git
+
   roles:
     - role: alphanodes.tasks.git_mirror

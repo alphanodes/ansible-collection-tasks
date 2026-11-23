@@ -13,3 +13,22 @@
       ansible.builtin.apt:
         name: svn2git
         state: present
+
+    - name: Install git for the test repositories
+      ansible.builtin.apt:
+        name: git
+        state: present
+
+    # Upstream with a default and a stable branch, mirrored by converge.yml
+    # and pushed to an empty bare repository
+    - name: Create the upstream and the push target repository
+      ansible.builtin.shell: |
+        set -e
+        git init -q -b master /srv/upstream
+        cd /srv/upstream
+        git -c user.name=test -c user.email=test@example.com commit -q --allow-empty -m initial
+        git branch stable
+        git init -q --bare /srv/target.git
+      args:
+        executable: /bin/bash
+        creates: /srv/target.git

@@ -17,3 +17,44 @@
     - name: Check git svn works
       ansible.builtin.command: git svn --version
       changed_when: false
+
+    # A backport lands on a stable branch while the default branch stays put.
+    # The git module does not report this as a change of the bare mirror.
+    - name: Add a commit to the stable branch only
+      ansible.builtin.shell: |
+        set -e
+        cd /srv/upstream
+        git checkout -q stable
+        git -c user.name=test -c user.email=test@example.com commit -q --allow-empty -m backport
+        git checkout -q master
+      args:
+        executable: /bin/bash
+      changed_when: true
+
+    - name: Run the mirror again
+      ansible.builtin.include_role:
+        name: alphanodes.tasks.git_mirror
+      vars:
+        git_mirrors:
+          - name: test
+            repo: /srv/upstream
+            push_to: /srv/target.git
+
+    - name: Read the stable branch of upstream and push target
+      ansible.builtin.command:
+        argv:
+          - git
+          - '--git-dir={{ item }}'
+          - rev-parse
+          - refs/heads/stable
+      loop:
+        - /srv/upstream/.git
+        - /srv/target.git
+      register: stable_heads
+      changed_when: false
+
+    - name: Assert the stable commit reached the push target
+      ansible.builtin.assert:
+        that:
+          - stable_heads.results[0].stdout == stable_heads.results[1].stdout
+        fail_msg: a commit on a non-default branch was not pushed to the mirror target

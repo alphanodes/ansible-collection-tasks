@@ -4,6 +4,20 @@
   ansible.builtin.set_fact:
     repo_dir: '{{ git_mirrors_root }}/{{ repo_spec.name }}'
 
+# The git module only reports a change of the bare repository when HEAD moves,
+# so new commits on other branches (e.g. a backport to a stable branch) would
+# never be pushed. Compare all refs instead.
+- name: Read refs before fetch - {{ repo_spec.name }}
+  ansible.builtin.command:
+    argv:
+      - git
+      - --git-dir={{ repo_dir }}
+      - for-each-ref
+      - --format=%(objectname) %(refname)
+  register: git_refs_before
+  changed_when: false
+  failed_when: false
+
 - name: Mirror git repository - {{ repo_spec.name }}
   ansible.builtin.git:
     repo: '{{ repo_spec.repo }}'
@@ -13,17 +27,27 @@
     force: true
   register: git_rc
 
+- name: Read refs after fetch - {{ repo_spec.name }}
+  ansible.builtin.command:
+    argv:
+      - git
+      - --git-dir={{ repo_dir }}
+      - for-each-ref
+      - --format=%(objectname) %(refname)
+  register: git_refs_after
+  changed_when: false
+
 - name: Push to remote server if repo changed - {{ repo_spec.name }}
   ansible.builtin.command: 'git push --mirror {{ repo_spec.push_to }}'
   args:
     chdir: '{{ repo_dir }}'
   when:
     - repo_spec.push_to is defined
-    - git_rc.changed
+    - git_rc.changed or git_refs_before.stdout != git_refs_after.stdout
 
 - name: Call URL if repo changed
   ansible.builtin.uri:
     url: '{{ repo_spec.call_url }}'
   when:
     - repo_spec.call_url is defined
-    - git_rc.changed
+    - git_rc.changed or git_refs_before.stdout != git_refs_after.stdout
