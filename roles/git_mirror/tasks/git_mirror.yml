@@ -9,11 +9,7 @@
 # never be pushed. Compare all refs instead.
 - name: Read refs before fetch - {{ repo_spec.name }}
   ansible.builtin.command:
-    argv:
-      - git
-      - --git-dir={{ repo_dir }}
-      - for-each-ref
-      - --format=%(objectname) %(refname)
+    cmd: git --git-dir={{ repo_dir | quote }} for-each-ref '--format=%(objectname) %(refname)'
   register: git_refs_before
   changed_when: false
   failed_when: false
@@ -31,22 +27,14 @@
 # renamed default branch (master to main) stayed and --mirror pushed it back
 - name: Remove branches deleted upstream - {{ repo_spec.name }}
   ansible.builtin.command:
-    argv:
-      - git
-      - --git-dir={{ repo_dir }}
-      - fetch
-      - --prune
-      - '{{ repo_spec.repo }}'
-      - +refs/heads/*:refs/heads/*
+    cmd: >-
+      git --git-dir={{ repo_dir | quote }} fetch --prune
+      {{ repo_spec.repo | quote }} '+refs/heads/*:refs/heads/*'
   changed_when: false
 
 - name: Read refs after fetch - {{ repo_spec.name }}
   ansible.builtin.command:
-    argv:
-      - git
-      - --git-dir={{ repo_dir }}
-      - for-each-ref
-      - --format=%(objectname) %(refname)
+    cmd: git --git-dir={{ repo_dir | quote }} for-each-ref '--format=%(objectname) %(refname)'
   register: git_refs_after
   changed_when: false
 
@@ -56,11 +44,7 @@
 # before its release.
 - name: Read branches of the push target - {{ repo_spec.name }}
   ansible.builtin.command:
-    argv:
-      - git
-      - ls-remote
-      - --heads
-      - '{{ repo_spec.push_to }}'
+    cmd: git ls-remote --heads {{ repo_spec.push_to | quote }}
   register: git_target_heads
   changed_when: false
   when:
