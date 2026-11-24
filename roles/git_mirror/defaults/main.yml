@@ -8,6 +8,13 @@ git_mirrors: []
 # - name: yourrepo (used as subdirectory for checkout)
 #   repo: git.github.com:yourname/target-repo-name
 #   version: dev
+#   push_to: git@git.example.com:yourname/target-repo-name.git
+#   # optional: push only these branches (plus all tags) and delete every
+#   # other branch on push_to. Without it all refs are pushed with --mirror.
+#   # Listed branches missing upstream are skipped.
+#   branches:
+#     - master
+#     - 7.0-stable
 
 git_mirrors_packages:
   - git

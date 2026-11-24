@@ -19,16 +19,22 @@
         name: git
         state: present
 
-    # Upstream with a default and a stable branch, mirrored by converge.yml
-    # and pushed to an empty bare repository
-    - name: Create the upstream and the push target repository
+    # Upstream with a default, a stable and an old branch and a tag, mirrored
+    # by converge.yml. target.git starts empty and gets every branch,
+    # filtered.git already holds all branches from an earlier full mirror and
+    # must end up with the selected ones only.
+    - name: Create the upstream and the push target repositories
       ansible.builtin.shell: |
         set -e
         git init -q -b master /srv/upstream
         cd /srv/upstream
         git -c user.name=test -c user.email=test@example.com commit -q --allow-empty -m initial
         git branch stable
+        git branch old
+        git tag v1.0
         git init -q --bare /srv/target.git
+        git init -q --bare /srv/filtered.git
+        git push -q --mirror /srv/filtered.git
       args:
         executable: /bin/bash
         creates: /srv/target.git

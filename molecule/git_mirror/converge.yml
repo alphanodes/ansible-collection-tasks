@@ -19,6 +19,14 @@
       - name: test
         repo: /srv/upstream
         push_to: /srv/target.git
+      # future does not exist upstream yet and is skipped
+      - name: filtered
+        repo: /srv/upstream
+        push_to: /srv/filtered.git
+        branches:
+          - master
+          - stable
+          - future
 
   roles:
     - role: alphanodes.tasks.git_mirror

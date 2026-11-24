@@ -18,15 +18,36 @@
       ansible.builtin.command: git svn --version
       changed_when: false
 
-    # A backport lands on a stable branch while the default branch stays put.
-    # The git module does not report this as a change of the bare mirror.
-    - name: Add a commit to the stable branch only
+    - name: Read the branches and tags of the filtered push target
+      ansible.builtin.command:
+        argv:
+          - git
+          - --git-dir=/srv/filtered.git
+          - for-each-ref
+          - --format=%(refname)
+      register: filtered_refs
+      changed_when: false
+
+    - name: Assert the filtered push target holds only the selected branches and all tags
+      ansible.builtin.assert:
+        that:
+          - filtered_refs.stdout_lines | sort == ['refs/heads/master', 'refs/heads/stable', 'refs/tags/v1.0']
+        fail_msg: 'unexpected refs in the filtered push target: {{ filtered_refs.stdout_lines }}'
+
+    # A backport on a stable branch that an earlier run already fetched but
+    # never pushed, e.g. by a role version that only pushed when the default
+    # branch moved or after a failed push. Fetching again finds nothing new,
+    # the push target must catch up anyway.
+    - name: Add a commit to the stable branch and fetch it into the local mirrors only
       ansible.builtin.shell: |
         set -e
         cd /srv/upstream
         git checkout -q stable
         git -c user.name=test -c user.email=test@example.com commit -q --allow-empty -m backport
         git checkout -q master
+        for mirror in test filtered; do
+          git --git-dir=/srv/mirrors/$mirror fetch -q /srv/upstream '+refs/heads/*:refs/heads/*'
+        done
       args:
         executable: /bin/bash
       changed_when: true
@@ -39,8 +60,14 @@
           - name: test
             repo: /srv/upstream
             push_to: /srv/target.git
+          - name: filtered
+            repo: /srv/upstream
+            push_to: /srv/filtered.git
+            branches:
+              - master
+              - stable
 
-    - name: Read the stable branch of upstream and push target
+    - name: Read the stable branch of upstream and the push targets
       ansible.builtin.command:
         argv:
           - git
@@ -50,11 +77,13 @@
       loop:
         - /srv/upstream/.git
         - /srv/target.git
+        - /srv/filtered.git
       register: stable_heads
       changed_when: false
 
-    - name: Assert the stable commit reached the push target
+    - name: Assert the stable commit reached both push targets
       ansible.builtin.assert:
         that:
-          - stable_heads.results[0].stdout == stable_heads.results[1].stdout
-        fail_msg: a commit on a non-default branch was not pushed to the mirror target
+          - stable_heads.results[1].stdout == stable_heads.results[0].stdout
+          - stable_heads.results[2].stdout == stable_heads.results[0].stdout
+        fail_msg: a commit fetched earlier but never pushed did not reach the mirror targets

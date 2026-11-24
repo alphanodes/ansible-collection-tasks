@@ -37,17 +37,55 @@
   register: git_refs_after
   changed_when: false
 
-- name: Push to remote server if repo changed - {{ repo_spec.name }}
-  ansible.builtin.command: 'git push --mirror {{ repo_spec.push_to }}'
-  args:
-    chdir: '{{ repo_dir }}'
+# With branches only these are pushed, together with all tags, and every
+# other branch of the push target is deleted. Listed branches that do not
+# exist upstream yet are skipped, so the next stable branch can be added
+# before its release.
+- name: Read branches of the push target - {{ repo_spec.name }}
+  ansible.builtin.command:
+    argv:
+      - git
+      - ls-remote
+      - --heads
+      - '{{ repo_spec.push_to }}'
+  register: git_target_heads
+  changed_when: false
   when:
     - repo_spec.push_to is defined
-    - git_rc.changed or git_refs_before.stdout != git_refs_after.stdout
+    - repo_spec.branches is defined
+
+- name: Set push refspecs - {{ repo_spec.name }}
+  ansible.builtin.set_fact:
+    git_push_refspecs: >-
+      {{ (pushed_branches | map('regex_replace', '^', '+refs/heads/')
+          | zip(pushed_branches | map('regex_replace', '^', ':refs/heads/')) | map('join') | list)
+         + ['+refs/tags/*:refs/tags/*']
+         + (target_branches | difference(repo_spec.branches) | map('regex_replace', '^', ':refs/heads/') | list) }}
+  vars:
+    pushed_branches: >-
+      {{ repo_spec.branches | intersect(git_refs_after.stdout_lines | select('search', ' refs/heads/')
+         | map('regex_replace', '^.* refs/heads/', '') | list) }}
+    target_branches: >-
+      {{ git_target_heads.stdout_lines | map('regex_replace', '^.*refs/heads/', '') | list }}
+  when:
+    - repo_spec.push_to is defined
+    - repo_spec.branches is defined
+
+# Pushed on every run, not only after a fetch brought something new, so the
+# target catches up after a failed push or with commits an earlier run
+# fetched without pushing.
+- name: Push to remote server - {{ repo_spec.name }}
+  ansible.builtin.command:
+    argv: "{{ ['git', '--git-dir=' ~ repo_dir, 'push']
+              + (['--mirror', repo_spec.push_to] if repo_spec.branches is undefined
+                 else [repo_spec.push_to] + git_push_refspecs) }}"
+  register: git_push
+  changed_when: "'Everything up-to-date' not in git_push.stderr"
+  when: repo_spec.push_to is defined
 
 - name: Call URL if repo changed
   ansible.builtin.uri:
     url: '{{ repo_spec.call_url }}'
   when:
     - repo_spec.call_url is defined
-    - git_rc.changed or git_refs_before.stdout != git_refs_after.stdout
+    - git_rc.changed or git_refs_before.stdout != git_refs_after.stdout or git_push is changed
