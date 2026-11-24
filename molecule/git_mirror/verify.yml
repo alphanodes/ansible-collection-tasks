@@ -87,3 +87,42 @@
           - stable_heads.results[1].stdout == stable_heads.results[0].stdout
           - stable_heads.results[2].stdout == stable_heads.results[0].stdout
         fail_msg: a commit fetched earlier but never pushed did not reach the mirror targets
+
+    # A branch deleted upstream (e.g. master renamed to main) must disappear
+    # from the local mirror too, otherwise --mirror pushes it back, which
+    # fails when the target protects that branch name
+    - name: Delete the old branch upstream
+      ansible.builtin.command: git -C /srv/upstream branch -D old
+      changed_when: true
+
+    - name: Run the mirror after the upstream deletion
+      ansible.builtin.include_role:
+        name: alphanodes.tasks.git_mirror
+      vars:
+        git_mirrors:
+          - name: test
+            repo: /srv/upstream
+            push_to: /srv/target.git
+
+    - name: Read the branches of the local mirror and the push target
+      ansible.builtin.command:
+        argv:
+          - git
+          - '--git-dir={{ item }}'
+          - for-each-ref
+          - --format=%(refname)
+          - refs/heads
+      loop:
+        - /srv/mirrors/test
+        - /srv/target.git
+      register: pruned_heads
+      changed_when: false
+
+    - name: Assert the deleted branch is gone from the local mirror and the push target
+      ansible.builtin.assert:
+        that:
+          - item.stdout_lines | sort == ['refs/heads/master', 'refs/heads/stable']
+        fail_msg: 'unexpected branches in {{ item.item }}: {{ item.stdout_lines }}'
+      loop: '{{ pruned_heads.results }}'
+      loop_control:
+        label: '{{ item.item }}'

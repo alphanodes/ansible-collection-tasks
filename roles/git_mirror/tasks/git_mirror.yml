@@ -27,6 +27,19 @@
     force: true
   register: git_rc
 
+# The git module never removes branches that were deleted upstream, so a
+# renamed default branch (master to main) stayed and --mirror pushed it back
+- name: Remove branches deleted upstream - {{ repo_spec.name }}
+  ansible.builtin.command:
+    argv:
+      - git
+      - --git-dir={{ repo_dir }}
+      - fetch
+      - --prune
+      - '{{ repo_spec.repo }}'
+      - +refs/heads/*:refs/heads/*
+  changed_when: false
+
 - name: Read refs after fetch - {{ repo_spec.name }}
   ansible.builtin.command:
     argv:
